@@ -1,0 +1,90 @@
+---
+import { SITE_TITLE } from '../consts';
+import HeaderLink from './HeaderLink.astro';
+---
+
+<header>
+	<nav>
+		<h2>
+			<a href="/">{SITE_TITLE}</a>
+		</h2>
+		<div class="internal-links">
+			<HeaderLink href="/">首页</HeaderLink>
+			<HeaderLink href="/about">关于</HeaderLink>
+			<HeaderLink href="/search">搜索</HeaderLink>
+		</div>
+		<button id="theme-toggle" class="theme-toggle" aria-label="切换明暗模式">
+			<svg class="icon-light" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-14a1 1 0 0 1-1-1V1a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1zm0 18a1 1 0 0 1-1-1v-2a1 1 0 0 1 2 0v2a1 1 0 0 1-1 1zM4.22 5.64a1 1 0 0 1 1.42 0l1.41 1.42a1 1 0 0 1-1.41 1.41L4.22 7.05a1 1 0 0 1 0-1.41zM16.95 15.54a1 1 0 0 1 1.41 0l1.42 1.41a1 1 0 0 1-1.42 1.42l-1.41-1.42a1 1 0 0 1 0-1.41zM1 11h2a1 1 0 0 1 0 2H1a1 1 0 0 1 0-2zm20 0h2a1 1 0 0 1 0 2h-2a1 1 0 0 1 0-2zM4.22 18.36a1 1 0 0 1 0-1.41l1.42-1.42a1 1 0 1 1 1.41 1.42l-1.41 1.41a1 1 0 0 1-1.42 0zM16.95 8.46a1 1 0 0 1 0-1.41l1.41-1.42a1 1 0 0 1 1.42 1.42l-1.42 1.41a1 1 0 0 1-1.41 0z"
+				></path>
+			</svg>
+			<svg class="icon-dark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M12.3 22a10.2 10.2 0 0 1-9.8-10A10.2 10.2 0 0 1 12.3 2c2.1 0 4 .6 5.6 1.7a1 1 0 0 1-.3 1.8 7 7 0 0 0-4.4 11.3 7 7 0 0 0 4.4 2.7 1 1 0 0 1 .3 1.8A10.1 10.1 0 0 1 12.3 22z"
+				></path>
+			</svg>
+		</button>
+	</nav>
+</header>
+<script>
+	function applyTheme(dark: boolean) {
+		document.documentElement.classList.toggle('dark', dark);
+		localStorage.setItem('theme', dark ? 'dark' : 'light');
+	}
+	document.getElementById('theme-toggle')?.addEventListener('click', () => {
+		applyTheme(!document.documentElement.classList.contains('dark'));
+	});
+</script>
+<style>
+	header {
+		margin: 0;
+		padding: 0 1em;
+		background: var(--header-bg);
+		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+	}
+	h2 {
+		margin: 0;
+		font-size: 1em;
+	}
+	h2 a,
+	h2 a.active {
+		text-decoration: none;
+	}
+	nav {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	nav a {
+		padding: 1em 0.5em;
+		color: var(--black);
+		border-bottom: 4px solid transparent;
+		text-decoration: none;
+	}
+	nav a.active {
+		text-decoration: none;
+		border-bottom-color: var(--accent);
+	}
+	.theme-toggle {
+		border: none;
+		background: none;
+		cursor: pointer;
+		padding: 0.5em;
+		color: rgb(var(--gray-dark));
+		display: flex;
+		align-items: center;
+	}
+	/* 明暗图标只在对应模式下显示 */
+	.icon-dark {
+		display: none;
+	}
+	:global(html.dark) .icon-dark {
+		display: block;
+	}
+	:global(html.dark) .icon-light {
+		display: none;
+	}
+</style>

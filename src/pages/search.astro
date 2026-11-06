@@ -1,0 +1,37 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+// pagefind 在 npm run build 后生成索引,开发服务器(npm run dev)里本页不可用
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`搜索 - ${SITE_TITLE}`} description="全文搜索" />
+		<link rel="stylesheet" href={`${base}pagefind/pagefind-ui.css`} />
+	</head>
+	<body data-pagefind-ignore>
+		<Header />
+		<main>
+			<h1>搜索</h1>
+			<div id="search"></div>
+		</main>
+		<Footer />
+		<script is:inline src={`${base}pagefind/pagefind-ui.js`}></script>
+		<script is:inline>
+			window.addEventListener('DOMContentLoaded', () => {
+				new PagefindUI({ element: '#search', showSubResults: true });
+			});
+		</script>
+	</body>
+</html>
+
+<style>
+	#search {
+		margin-top: 1em;
+	}
+</style>

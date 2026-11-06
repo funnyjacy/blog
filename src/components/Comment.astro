@@ -1,0 +1,39 @@
+---
+import { GISCUS } from '../consts';
+
+// GISCUS.repoId 未配置时不渲染评论,避免加载报错
+const enabled = Boolean(GISCUS.repo && GISCUS.repoId && GISCUS.categoryId);
+---
+
+{
+	enabled && (
+		<section class="comments">
+			<script
+				is:inline
+				src="https://giscus.app/client.js"
+				data-repo={GISCUS.repo}
+				data-repo-id={GISCUS.repoId}
+				data-category={GISCUS.category}
+				data-category-id={GISCUS.categoryId}
+				data-mapping={GISCUS.mapping}
+				data-strict="0"
+				data-reactions-enabled="1"
+				data-emit-metadata="0"
+				data-input-position="top"
+				data-theme="preferred_color_scheme"
+				data-lang={GISCUS.lang}
+				data-loading="lazy"
+				crossorigin="anonymous"
+				async
+			/>
+		</section>
+	)
+}
+
+<style>
+	.comments {
+		margin-top: 3em;
+		border-top: 1px solid rgb(var(--gray-light));
+		padding-top: 1em;
+	}
+</style>
