@@ -1,63 +1,41 @@
-# Astro Starter Kit: Blog
+# ZHD随想
+
+个人随想博客,部署在 https://funnyjacy.github.io/blog/ 。Astro 官方 blog 模板 + 暗色模式 + pagefind 全文搜索 + giscus 评论。
+
+## 日常写一篇
+
+1. 在 `src/content/blog/` 新建 `.md` 文件(文件名即 URL,建议 `YYYY-MM-DD-标题.md`):
+
+   ```yaml
+   ---
+   title: 标题
+   description: 一句话摘要(可省)
+   pubDate: 2026-11-06
+   ---
+   正文随便写 Markdown
+   ```
+
+2. `git add -A && git commit -m "..." && git push`,约 3 分钟后线上生效。
+
+## 本地预览
 
 ```sh
-npm create astro@latest -- --template blog
+npm run dev        # 开发服务器,搜索页不可用(索引是构建时生成的)
+npm run build && npx pagefind --site dist && npm run preview   # 完整预览(含搜索)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 评论(giscus)尚待配置
 
-Features:
+代码已就绪(consts.ts 里 GISCUS 留空则不显示评论),需要你手动做一次:
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and Open Graph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+1. 打开 https://giscus.app/zh-CN ,登录 GitHub;
+2. 仓库输入 `funnyjacy/blog`(Discussions 已启用);
+3. 按提示安装 giscus App 到该仓库;
+4. 页面底部生成 `data-repo-id` 和 `data-category-id`,填进 `src/consts.ts` 的 `GISCUS`;
+5. push 即生效。
 
-## 🚀 Project Structure
+## 已踩过的坑
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+- satteri 0.11.6 没发布 Windows 二进制,已用 `overrides` 钉在 0.11.5;pagefind 钉在 1.5.2(1.6.0 的 linux-arm64/windows-arm64 可选包未发布,会让 npm 装包时炸出 `Invalid Version:`)。升级这两个包前先确认上游平台包齐全。
+- astro.config 里 `base: '/blog'` 的 BASE_URL 不带尾斜杠,拼接资源路径时注意。
+- astro 本地 `preview` 对部分嵌套路由目录会误报 404,文件其实正常;用任意静态服务器直接 serve `dist/` 验证即可,GitHub Pages 不受影响。
