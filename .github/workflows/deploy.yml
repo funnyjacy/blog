@@ -14,15 +14,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install, build
-        uses: withastro/action@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       # 构建完再跑 pagefind 生成搜索索引
-      - name: Build pagefind index
-        run: npx pagefind --site dist
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - run: npx pagefind --site dist
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
@@ -33,6 +34,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
