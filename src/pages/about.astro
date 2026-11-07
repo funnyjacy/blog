@@ -1,8 +1,10 @@
 ---
+// 关于页正文在 src/content/about.md,改那个文件即可,本页只是壳
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import AboutContent from '../content/about.md';
 ---
 
 <!doctype html>
@@ -12,10 +14,15 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>关于</h1>
-			<p>个人随想与记录,写给自己看。</p>
+		<main class="prose">
+			<AboutContent />
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	main.prose {
+		padding-top: 2em;
+	}
+</style>

@@ -24,16 +24,6 @@ npm run dev        # 开发服务器,搜索页不可用(索引是构建时生成
 npm run build && npx pagefind --site dist && npm run preview   # 完整预览(含搜索)
 ```
 
-## 评论(giscus)尚待配置
-
-代码已就绪(consts.ts 里 GISCUS 留空则不显示评论),需要你手动做一次:
-
-1. 打开 https://giscus.app/zh-CN ,登录 GitHub;
-2. 仓库输入 `funnyjacy/blog`(Discussions 已启用);
-3. 按提示安装 giscus App 到该仓库;
-4. 页面底部生成 `data-repo-id` 和 `data-category-id`,填进 `src/consts.ts` 的 `GISCUS`;
-5. push 即生效。
-
 ## 已踩过的坑
 
 - satteri 0.11.6 没发布 Windows 二进制,已用 `overrides` 钉在 0.11.5;pagefind 钉在 1.5.2(1.6.0 的 linux-arm64/windows-arm64 可选包未发布,会让 npm 装包时炸出 `Invalid Version:`)。升级这两个包前先确认上游平台包齐全。
