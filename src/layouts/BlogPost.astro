@@ -14,7 +14,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description ?? title} />
 		<style>
 			main {
 				width: calc(100% - 2em);
@@ -82,7 +82,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 							)}
 						</div>
 						<h1>{title}</h1>
-						<p class="description">{description}</p>
+						{description && <p class="description">{description}</p>}
 						<hr />
 					</div>
 					<slot />
