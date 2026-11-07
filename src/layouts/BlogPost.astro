@@ -51,7 +51,12 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				color: rgb(var(--gray));
 			}
 			.last-updated-on {
-				font-style: italic;
+				margin: 2em 0 0 0;
+				padding: 0.8em 1em;
+				background: rgb(var(--gray-light) / 40%);
+				border-radius: 8px;
+				color: rgb(var(--gray));
+				font-size: 0.8em;
 			}
 			.description {
 				margin: 0 0 1.5em 0;
@@ -75,17 +80,15 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
-							{updatedDate && (
-								<div class="last-updated-on">
-									更新于 <FormattedDate date={updatedDate} />
-								</div>
-							)}
 						</div>
 						<h1>{title}</h1>
 						{description && <p class="description">{description}</p>}
 						<hr />
 					</div>
 					<slot />
+					<p class="last-updated-on">
+						本文最后更新于 <FormattedDate date={updatedDate ?? pubDate} />
+					</p>
 					<Comment />
 				</div>
 			</article>

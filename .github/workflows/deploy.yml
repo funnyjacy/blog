@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 拉全量 git 历史,用于计算文章"更新于"时间
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24

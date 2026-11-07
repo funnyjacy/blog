@@ -1,20 +1,34 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { execFileSync } from 'node:child_process';
 import BlogPost from '../layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
+	// post.filePath 形如 src/content/blog/xxx.md,可直接传给 git
+	function gitModifiedTime(file: string): Date | undefined {
+		if (!file) return undefined;
+		try {
+			const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', file], {
+				encoding: 'utf8',
+			}).trim();
+			return out ? new Date(out) : undefined;
+		} catch {
+			return undefined; // 无 git 历史时跳过
+		}
+	}
+
 	const posts = await getCollection('blog');
 	return posts.map((post) => ({
 		params: { slug: post.id },
-		props: post,
+		props: { post, modified: gitModifiedTime(post.filePath) },
 	}));
 }
-type Props = CollectionEntry<'blog'>;
+type Props = { post: CollectionEntry<'blog'>; modified?: Date };
 
-const post = Astro.props;
+const { post, modified } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BlogPost {...post.data}>
+<BlogPost {...post.data} updatedDate={post.data.updatedDate ?? modified}>
 	<Content />
 </BlogPost>
