@@ -1,11 +1,18 @@
 ---
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, UMAMI } from '../consts';
 
 const today = new Date();
 ---
 
 <footer>
 	&copy; {today.getFullYear()} {SITE_TITLE}
+	{
+		UMAMI.shareUrl && (
+			<span class="stats-link">
+				· <a href={UMAMI.shareUrl} target="_blank" rel="noopener">访问统计</a>
+			</span>
+		)
+	}
 </footer>
 <style>
 	footer {
@@ -13,5 +20,13 @@ const today = new Date();
 		background: linear-gradient(var(--gray-gradient)) no-repeat;
 		color: rgb(var(--gray));
 		text-align: center;
+	}
+	.stats-link a {
+		color: rgb(var(--gray));
+		text-decoration: none;
+	}
+	.stats-link a:hover {
+		color: var(--accent);
+		text-decoration: underline;
 	}
 </style>
