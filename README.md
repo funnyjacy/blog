@@ -1,4 +1,4 @@
-# ZHD随想
+# funnyjacy的博客
 
 个人随想博客,部署在 https://funnyjacy.github.io/blog/ 。Astro 官方 blog 模板 + 暗色模式 + pagefind 全文搜索 + giscus 评论。
 
