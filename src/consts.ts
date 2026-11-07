@@ -19,5 +19,5 @@ export const UMAMI = {
 	src: 'https://cloud.umami.is/script.js',
 	websiteId: '953181ca-ca29-43da-8662-0db94cb4c33a',
 	// 公开统计页(后台 Share URL 开关生成),留空则页脚不显示
-	shareUrl: 'https://cloud.umami.is/share/CzjsTp95q6QCIBB6',
+	shareUrl: 'https://cloud.umami.is/share/LCb9tuJHrGEHACHQ',
 };
