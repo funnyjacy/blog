@@ -6,8 +6,8 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	// GitHub Pages 项目站:https://zhaohaode.github.io/blog/
-	site: 'https://zhaohaode.github.io',
+	// GitHub Pages 项目站:https://funnyjacy.github.io/blog/
+	site: 'https://funnyjacy.github.io',
 	base: '/blog',
 	integrations: [mdx(), sitemap()],
 	fonts: [
