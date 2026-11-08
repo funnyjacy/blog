@@ -40,11 +40,49 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		document.documentElement.classList.toggle('dark', dark);
 		localStorage.setItem('theme', dark ? 'dark' : 'light');
 	}
-	document.getElementById('theme-toggle')?.addEventListener('click', () => {
-		applyTheme(!document.documentElement.classList.contains('dark'));
+
+	document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
+		const dark = !document.documentElement.classList.contains('dark');
+		// 不支持 View Transition 或系统开了减少动效:瞬间切换
+		if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			applyTheme(dark);
+			return;
+		}
+		const root = document.documentElement;
+		// 记下按钮位置,作为圆形扩散的圆心
+		const { clientX: x, clientY: y } = e as MouseEvent;
+		// 半径取"圆心到最远角落"的距离,保证扩散能盖住全屏
+		const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+		root.style.setProperty('--theme-x', `${x}px`);
+		root.style.setProperty('--theme-y', `${y}px`);
+		root.style.setProperty('--theme-r', `${radius}px`);
+		document.startViewTransition(() => applyTheme(dark));
 	});
 </script>
+
 <style>
+	/* 圆形扩散切换动画:旧画面静止在底层,新画面用 clip-path 从按钮位置扩开 */
+	:global(::view-transition-old(root)),
+	:global(::view-transition-new(root)) {
+		animation: none;
+		mix-blend-mode: normal;
+	}
+	:global(::view-transition-old(root)) {
+		z-index: 1;
+	}
+	:global(::view-transition-new(root)) {
+		z-index: 2;
+		animation: theme-spread 300ms ease-in both;
+	}
+	@keyframes theme-spread {
+		from {
+			clip-path: circle(0 at var(--theme-x) var(--theme-y));
+		}
+		to {
+			clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y));
+		}
+	}
+
 	header {
 		margin: 0;
 		padding: 0 1em;

@@ -1,11 +1,16 @@
 # 项目说明
 
+官方构建参考@AGENTS.md
 个人博客(Astro),部署在 https://funnyjacy.github.io/blog/ 。日常使用规则见 README.md。
+
+## 开发规则
+- 一定要坚持Astro的静态，快速，简洁原则，如果解决方案会引入大量js负担必须向用户警告
 
 ## Git 提交规则(重要)
 
 - **任何 git commit / git push 必须先向用户确认,得到明确同意后才能执行**
 - 默认只做本地验证(npm run build + pagefind + 本地预览),验证通过即停,不主动提交
+- 项目中有可能会有还未commit的文章或者自己的修改，Claude Code完成任务后要询问作者是否要一并把作者自己的修改和自己的修改一起commit，绝对不要自己擅自全部commit！！！
 - 用户说"上线"/"发布"时才推送到远端
 
 ## 已踩过的坑

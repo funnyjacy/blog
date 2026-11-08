@@ -37,6 +37,13 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				padding: 1em;
 				color: rgb(var(--gray-dark));
 			}
+			/* 正文图片自适应宽度,避免大图溢出 */
+			.prose img {
+				max-width: 100%;
+				height: auto;
+				display: block;
+				margin: 1em auto;
+			}
 			.title {
 				margin-bottom: 1em;
 				padding: 1em 0;
