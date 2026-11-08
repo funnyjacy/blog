@@ -12,6 +12,7 @@
 - 默认只做本地验证(npm run build + pagefind + 本地预览),验证通过即停,不主动提交
 - 项目中有可能会有还未commit的文章或者自己的修改，Claude Code完成任务后要询问作者是否要一并把作者自己的修改和自己的修改一起commit，绝对不要自己擅自全部commit！！！
 - 用户说"上线"/"发布"时才推送到远端
+- **推送后必须检查 GitHub Actions 构建结果**(`gh run list --repo funnyjacy/blog --limit 1`,失败用 `gh run view <run-id> --log-failed` 看日志),不能推完就当成功——本地构建通过不代表 CI 通过(如 CI 上会构建本地未提交的文章)
 
 ## 已踩过的坑
 
