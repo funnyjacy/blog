@@ -24,7 +24,11 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		<script is:inline src={`${base}pagefind/pagefind-ui.js`}></script>
 		<script is:inline>
 			window.addEventListener('DOMContentLoaded', () => {
-				new PagefindUI({ element: '#search', showSubResults: true });
+				new PagefindUI({
+		element: '#search',
+		showSubResults: true,
+		translations: { clear_search: '清空' },
+	});
 			});
 		</script>
 	</body>
@@ -44,6 +48,8 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 	.pagefind-ui {
 		--pagefind-ui-text: rgb(var(--gray-dark));
 		--pagefind-ui-primary: rgb(var(--gray-dark));
+		/* 自带 #eeeeee 边框在白天背景下几乎看不见,用灰阶主色调半透明 */
+		--pagefind-ui-border: rgba(var(--gray), 45%);
 	}
 	.pagefind-ui__result-title,
 	.pagefind-ui__result-link,
@@ -61,11 +67,25 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		font-size: 16px !important;
 		color: rgb(var(--gray-dark));
 	}
+	/* 输入框背景在两种模式下都是纯白,框内文字/放大镜/清除按钮一律纯黑,
+	   不跟随暗色主题(之前跟着 --pagefind-ui-text 变量变成浅灰,在白底上特别淡) */
 	.pagefind-ui__search-input {
-		color: rgb(var(--gray-dark));
+		color: #000;
+	}
+	.pagefind-ui__search-input::placeholder {
+		color: #000;
+		/* pagefind 默认 opacity .2,白底上淡到几乎看不见;其选择器带 .svelte
+		   双类特异性,需 !important 压过 */
+		opacity: 0.5 !important;
+	}
+	.pagefind-ui__form::before {
+		/* 放大镜伪元素实际挂在 form 上(不是 input),底色;pagefind 带 .svelte
+		   双类特异性,需 !important */
+		background-color: #000 !important;
 	}
 	.pagefind-ui__search-clear {
-		color: rgb(var(--gray));
+		color: #000 !important;
+		font-size: 16px !important;
 	}
 	.pagefind-ui__mark {
 		background: rgba(255, 220, 0, 45%);
