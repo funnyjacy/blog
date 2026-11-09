@@ -17,6 +17,29 @@
 
 2. `git add -A && git commit -m "..." && git push`,约 3 分钟后线上生效。
 
+## 正文图片大小
+
+- **默认**:全站正文图片自动缩到内容区的 80%(居中),在 `src/layouts/BlogPost.astro` 的 `.prose img` 里调整。
+- **单图控制**:在 md 里图片语法后跟第二对括号(不要有空格),由 remark-imgattr 插件解析:
+
+  ```markdown
+  ![说明](./xxx.assets/图.png)(width: 400)
+  ![说明](./xxx.assets/图.png)(style: max-width: 50%)
+  ![说明](./xxx.assets/图.png)(quality: 80)
+  ```
+
+  `width` 会按该尺寸生成更小的优化图(省流量),`style` 只影响显示。不加括号就是默认居中、80% 宽。
+- **对齐**:默认居中;想让图片靠左或靠右、或不缩小占满整栏,用 `class`:
+
+  ```markdown
+  ![说明](./xxx.assets/图.png)(class: align-left)    <!-- 靠左 -->
+  ![说明](./xxx.assets/图.png)(class: align-right)   <!-- 靠右 -->
+  ![说明](./xxx.assets/图.png)(class: full)          <!-- 占满整栏 -->
+  ```
+
+  可与其他属性组合:`(width: 400, class: align-left)`。
+- **注意**:改 `astro.config.mjs` 后 dev server 必须重启才能看到效果,生产构建不受影响。
+
 ## 本地预览
 
 ```sh

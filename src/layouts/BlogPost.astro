@@ -37,12 +37,24 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				padding: 1em;
 				color: rgb(var(--gray-dark));
 			}
-			/* 正文图片自适应宽度,避免大图溢出 */
-			.prose img {
-				max-width: 100%;
+			/* 正文图片默认缩到内容区的 80% 并居中(md 内容是 slotted,必须 :global 才能命中)。
+			   md 里用 (class: align-left / align-right / full) 覆盖对齐和宽度 */
+			.prose :global(img) {
+				max-width: 80%;
 				height: auto;
 				display: block;
 				margin: 1em auto;
+			}
+			.prose :global(img.align-left) {
+				margin-left: 0;
+				margin-right: auto;
+			}
+			.prose :global(img.align-right) {
+				margin-left: auto;
+				margin-right: 0;
+			}
+			.prose :global(img.full) {
+				max-width: 100%;
 			}
 			.title {
 				margin-bottom: 1em;

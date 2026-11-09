@@ -19,6 +19,7 @@
     "astro": "^7.4.7",
     "katex": "^0.19.1",
     "rehype-katex": "^7.0.1",
+    "remark-imgattr": "^1.1.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.35.0"
   },

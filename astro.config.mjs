@@ -3,6 +3,7 @@
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeKatex from 'rehype-katex';
+import remarkImgattr from 'remark-imgattr';
 import remarkMath from 'remark-math';
 import { defineConfig, fontProviders } from 'astro/config';
 
@@ -13,7 +14,7 @@ export default defineConfig({
 	base: '/blog',
 	integrations: [mdx(), sitemap()],
 	markdown: {
-		remarkPlugins: [remarkMath],
+		remarkPlugins: [remarkImgattr, remarkMath],
 		rehypePlugins: [rehypeKatex],
 	},
 	fonts: [
