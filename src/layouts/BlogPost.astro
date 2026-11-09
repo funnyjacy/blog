@@ -36,7 +36,7 @@ const base = import.meta.env.BASE_URL;
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				width: 720px;
+				width: 880px;
 				max-width: calc(100% - 2em);
 				margin: auto;
 				padding: 1em;
@@ -92,7 +92,7 @@ const base = import.meta.env.BASE_URL;
 			}
 			/* 底部导航条:上一篇 / 所有文章 / 下一篇 */
 			.post-nav {
-				width: 720px;
+				width: 880px;
 				max-width: calc(100% - 2em);
 				margin: 2.5em auto 0;
 				padding: 1em 0 0;
@@ -153,6 +153,27 @@ const base = import.meta.env.BASE_URL;
 				color: rgb(var(--gray));
 				white-space: nowrap;
 			}
+			/* 代码块容器 + 右上角复制按钮(JS 注入) */
+			.prose :global(.pre-wrap) {
+				position: relative;
+			}
+			.prose :global(.copy-btn) {
+				position: absolute;
+				top: 0.6em;
+				right: 0.6em;
+				padding: 0.25em 0.7em;
+				font-size: 0.7em;
+				color: rgb(var(--gray-dark));
+				background: rgb(var(--gray-light) / 60%);
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 6px;
+				cursor: pointer;
+				opacity: 0.5;
+				transition: opacity 0.15s;
+			}
+			.prose :global(.copy-btn:hover) {
+				opacity: 1;
+			}
 		</style>
 	</head>
 
@@ -206,5 +227,42 @@ const base = import.meta.env.BASE_URL;
 			</article>
 		</main>
 		<Footer />
+		<script>
+			// 代码块右上角复制按钮:纯原生 JS,给每个 pre 包一层定位容器并注入按钮
+			for (const pre of document.querySelectorAll('.prose pre')) {
+				const wrap = document.createElement('div');
+				wrap.className = 'pre-wrap';
+				pre.parentNode.insertBefore(wrap, pre);
+				wrap.appendChild(pre);
+
+				const btn = document.createElement('button');
+				btn.className = 'copy-btn';
+				btn.type = 'button';
+				btn.textContent = 'Copy';
+				btn.addEventListener('click', async () => {
+					const ok = await copyText(pre.innerText);
+					btn.textContent = ok ? '已复制' : '复制失败';
+					setTimeout(() => (btn.textContent = 'Copy'), 1500);
+				});
+				wrap.appendChild(btn);
+			}
+
+			// 优先用 async Clipboard API,被拒(如 iframe/权限)时退回 execCommand 兜底
+			async function copyText(text) {
+				try {
+					await navigator.clipboard.writeText(text);
+					return true;
+				} catch {
+					const ta = document.createElement('textarea');
+					ta.value = text;
+					ta.style.cssText = 'position:fixed;opacity:0';
+					document.body.appendChild(ta);
+					ta.select();
+					const ok = document.execCommand('copy');
+					ta.remove();
+					return ok;
+				}
+			}
+		</script>
 	</body>
 </html>

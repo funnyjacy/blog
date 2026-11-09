@@ -48,7 +48,8 @@ body {
 	overflow-wrap: break-word;
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
-	line-height: 1.7;
+	/* 1.7 对中文正文太松,行与行之间割裂感明显 */
+	line-height: 1.6;
 }
 html.dark body {
 	background-color: #16181d;
@@ -63,7 +64,7 @@ main {
 	flex: 1;
 }
 main {
-	width: 720px;
+	width: 880px;
 	max-width: calc(100% - 2em);
 	margin: auto;
 	padding: 3em 1em;
@@ -107,7 +108,7 @@ p {
 	margin-bottom: 1em;
 }
 .prose p {
-	margin-bottom: 2em;
+	margin-bottom: 1.2em;
 }
 textarea {
 	width: 100%;
