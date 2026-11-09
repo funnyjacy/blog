@@ -35,3 +35,40 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		margin-top: 1em;
 	}
 </style>
+<style is:global>
+	/* pagefind-ui 自带样式用硬编码灰字(#393939),暗色模式下对比度极低,
+	   全部换成站点自己的灰阶变量。Pagefind 是运行时生成的 DOM,
+	   scoped 样式带不上 scope 属性,必须 is:global。
+	   其内部规则是三层 .svelte 类的高特异性选择器,直接覆盖组件根上的
+	   颜色变量最稳 */
+	.pagefind-ui {
+		--pagefind-ui-text: rgb(var(--gray-dark));
+		--pagefind-ui-primary: rgb(var(--gray-dark));
+	}
+	.pagefind-ui__result-title,
+	.pagefind-ui__result-link,
+	.pagefind-ui__result-excerpt {
+		color: rgb(var(--gray-dark));
+	}
+	/* 摘要与结果计数行:pagefind 内部用 .svelte-x.svelte-x 双类特异性,
+	   普通选择器压不过,只能 !important */
+	.pagefind-ui__result-excerpt {
+		font-size: 16px !important;
+		color: rgb(var(--gray-dark));
+	}
+	.pagefind-ui__result .pagefind-ui__result-name,
+	.pagefind-ui__message {
+		font-size: 16px !important;
+		color: rgb(var(--gray-dark));
+	}
+	.pagefind-ui__search-input {
+		color: rgb(var(--gray-dark));
+	}
+	.pagefind-ui__search-clear {
+		color: rgb(var(--gray));
+	}
+	.pagefind-ui__mark {
+		background: rgba(255, 220, 0, 45%);
+		color: inherit;
+	}
+</style>
