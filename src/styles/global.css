@@ -40,12 +40,27 @@ body {
 	padding: 0;
 	text-align: left;
 	background: linear-gradient(var(--gray-gradient)) no-repeat;
+	/* 渐变只铺顶部 600px,必须再给整页一个底色,否则 600px 以下到页脚之间
+	   没有任何元素上色,会透出浏览器/预览面板的深色底(表现为底部一块黑) */
+	background-color: #fff;
 	background-size: 100% 600px;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	line-height: 1.7;
+}
+html.dark body {
+	background-color: #16181d;
+}
+/* sticky footer:内容不足一屏时页脚也贴到视口底部 */
+body {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+main {
+	flex: 1;
 }
 main {
 	width: 720px;

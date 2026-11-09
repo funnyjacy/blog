@@ -8,7 +8,7 @@ import AboutContent from '../content/about.md';
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="about">
 	<head>
 		<BaseHead title={`关于 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
@@ -24,5 +24,32 @@ import AboutContent from '../content/about.md';
 <style>
 	main.prose {
 		padding-top: 2em;
+	}
+</style>
+<style is:global>
+	/* 仅关于页:Telegram 涂鸦层整页平铺(含文字底下)。
+	样式本身会被打进全站 CSS,必须用 html.about 作用域隔离 */
+	/* 去掉 body 顶部 600px 渐变,让涂鸦铺满全页不留白 */
+	html.about body {
+		background: #fff;
+	}
+	html.about.dark body {
+		background: #16181d;
+	}
+	/* 页脚也去掉自带渐变,否则底部会有一条不透底的浅色带 */
+	html.about footer {
+		background: none;
+	}
+	html.about body::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		background-image: url('/files/space-light.svg');
+		background-repeat: repeat;
+		background-size: 562.5px 1218px;
+	}
+	html.about.dark body::before {
+		background-image: url('/files/space-dark.svg');
 	}
 </style>
