@@ -18,17 +18,39 @@ export async function getStaticPaths() {
 	}
 
 	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: { post, modified: gitModifiedTime(post.filePath) },
-	}));
+	// 与首页列表相同的排序(新在前),用于推算上一篇/下一篇
+	const sorted = [...posts].sort(
+		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	);
+	return posts.map((p) => {
+		const i = sorted.findIndex((q) => q.id === p.id);
+		return {
+			params: { slug: p.id },
+			props: {
+				post: p,
+				modified: gitModifiedTime(p.filePath),
+				prev: i < sorted.length - 1 ? sorted[i + 1] : undefined,
+				next: i > 0 ? sorted[i - 1] : undefined,
+			},
+		};
+	});
 }
-type Props = { post: CollectionEntry<'blog'>; modified?: Date };
+type Props = {
+	post: CollectionEntry<'blog'>;
+	modified?: Date;
+	prev?: CollectionEntry<'blog'>;
+	next?: CollectionEntry<'blog'>;
+};
 
-const { post, modified } = Astro.props;
+const { post, modified, prev, next } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BlogPost {...post.data} updatedDate={post.data.updatedDate ?? modified}>
+<BlogPost
+	{...post.data}
+	updatedDate={post.data.updatedDate ?? modified}
+	prev={prev && { slug: prev.id, title: prev.data.title }}
+	next={next && { slug: next.id, title: next.data.title }}
+>
 	<Content />
 </BlogPost>
