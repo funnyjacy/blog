@@ -39,7 +39,7 @@ Anthropic 和智谱都是以编程为训练目标的公司，它们的模型完�
 
 Skill 就是 Prompt。我只推荐一个 Skill——/grill-me。
 
-想出这个 Skill 的人绝对是个天才。下面节选自它的 SKILL.md：
+想出这个 Skill 的人绝对是个天才。下面是它的 SKILL.md全文：
 
 ```
 name: grill-me
@@ -63,11 +63,17 @@ AI 的生成是概率结果，方案没提前定好，很容易得到不想要�
 
 Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，但都不算好用，所以开发者圈子一直在插件和外部工具这块努力。
 
+推荐几个插件和工具，都在实时解决 Claude Code 本身的痛点。
+
 Claude 内置搜索 → 换成 [exa](https://exa.ai/)（要登录使用）
+
+Claude 内置搜索质量很差，经常搜到过时的、没用的内容，所以要换成 exa——它的搜索非常全面。
 
 ![exa 搜索界面](./2026-11-10-Better-Claude-Code.assets/image-20261110165446678.png)
 
 Claude 调用操作浏览器 → 换成 Vercel 家的 agent-browser
+
+Claude 内置的浏览器只支持小项目。如果需要真实打开 Chrome、用到用户的登录状态，就用 Vercel 家的 agent-browser——Rust 构建，也没有 chrome-devtools 那种 MCP 的时间和 token 开销。
 
 **[agent-browser](https://github.com/vercel-labs/agent-browser)**
 
@@ -75,17 +81,11 @@ Claude 调用操作浏览器 → 换成 Vercel 家的 agent-browser
 
 前端调试开发 → chrome-devtools（现在已改成 plugin）
 
+chrome-devtools 主要用来辅助前端开发，但比较慢，token 开销也大。
+
 **[chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp)**
 
 ![chrome-devtools-mcp](./2026-11-10-Better-Claude-Code.assets/image-20261110170214258.png)
-
-这几个插件和工具，都在实时解决 Claude Code 本身的痛点。
-
-Claude 内置搜索质量很差，经常搜到过时的、没用的内容，所以要换成 exa——它的搜索非常全面。
-
-Claude 内置的浏览器只支持小项目。如果需要真实打开 Chrome、用到用户的登录状态，就用 Vercel 家的 agent-browser——Rust 构建，也没有 chrome-devtools 那种 MCP 的时间和 token 开销。
-
-chrome-devtools 主要用来辅助前端开发，但比较慢，token 开销也大。
 
 ## 四、全局 CLAUDE.md
 
