@@ -48,11 +48,13 @@ const posts = (await getCollection('blog')).sort(
 	.post-list li {
 		display: flex;
 		align-items: baseline;
-		gap: 1em;
+		gap: 0.75em;
 		padding: 0.35em 0;
 	}
 	.date {
 		flex-shrink: 0;
+		/* 固定宽度:一位数和两位数日期宽度不同,不给定宽标题起点会跟着错位 */
+		width: 7.2em;
 		font-size: 0.8em;
 		color: rgb(var(--gray));
 		font-variant-numeric: tabular-nums;

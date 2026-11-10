@@ -133,19 +133,34 @@ code {
 pre {
 	padding: 1.5em;
 	border-radius: 8px;
+	/* 代码块行距比正文紧,1.6 对代码太松散 */
+	line-height: 1.45;
 }
 pre > code {
 	all: unset;
 }
 blockquote {
-	border-left: 4px solid var(--accent);
+	border-left: 4px solid #3f9d63;
 	padding: 0 0 0 20px;
 	margin: 0;
-	font-size: 1.333em;
+	/* 引用是附属信息,字号要小于正文,不再用 Bearblog 默认的 1.333em 放大 */
+	font-size: 0.85em;
+	color: rgb(var(--gray));
+}
+html.dark blockquote {
+	border-left-color: #7fd29a;
 }
 hr {
 	border: none;
 	border-top: 1px solid rgb(var(--gray-light));
+}
+/* 文章目录:用方框与正文区分开,只框「## 目录」后面紧邻的那个 ol */
+#目录 + ol {
+	margin: 1.5em 0;
+	padding: 1em 1em 1em 2.5em;
+	border: 3px solid rgb(var(--gray-light));
+	border-radius: 8px;
+	background: rgb(var(--gray-light) / 30%);
 }
 @media (max-width: 720px) {
 	body {

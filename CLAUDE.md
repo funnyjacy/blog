@@ -1,6 +1,7 @@
 # 项目说明
 
 官方构建参考@AGENTS.md
+
 个人博客(Astro),部署在 https://funnyjacy.github.io/blog/ 。日常使用规则见 README.md。
 
 ## 开发规则
