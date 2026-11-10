@@ -39,7 +39,10 @@ const posts = (await getCollection('blog')).sort(
 <style>
 	.post-list {
 		list-style: none;
-		margin: 0;
+		/* 全局 main 已加宽到 880px,首页列表收回原宽度并居中,
+		   保持加宽前列表原本的视觉位置 */
+		max-width: 720px;
+		margin: 0 auto;
 		padding: 0;
 	}
 	.post-list li {
