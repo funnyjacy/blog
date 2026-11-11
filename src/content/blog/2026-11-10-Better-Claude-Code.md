@@ -65,27 +65,49 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 推荐几个插件和工具，都在实时解决 Claude Code 本身的痛点。
 
-Claude 内置搜索 → 换成 [exa](https://exa.ai/)（要登录使用）
+- **GitHub CLI（gh）**
+  - 装了它以后，Claude 提 PR、查 Issue、管理仓库全部用命令完成，再也不用你去点 GitHub 网页
+  - 创建 PR 只需一条命令，描述还能自动生成，不用手写
+  - Issue 的查看、搜索、评论也全在终端里完成
+  - Claude 可以直接读 CI 的构建结果和失败日志，不用你自己去网页上翻
+  - 支持 GitHub 全家桶：仓库、Release、Gist、Actions 都能操作
+  - 一切都能转化成 CLI 命令，交给 Claude 自动执行
+  - <http://cli.github.com/>
 
-Claude 内置搜索质量很差，经常搜到过时的、没用的内容，所以要换成 exa——它的搜索非常全面。
+![GitHub CLI](./2026-11-10-Better-Claude-Code.assets/image-20261110233150217.png)
+
+- **exa**
+  - Claude 内置搜索经常搜到过时、没用的内容；换成 exa 后搜出来的东西又全又新，深度研究一个话题终于够用了
+  - 返回结果自带 highlights 摘要，不用逐个点开网页就能判断哪篇有用
+  - 对技术类查询尤其准，找文档、找博客、找 GitHub 项目都很好用
+  - 支持一次批量抓取多个 URL 的正文内容
+  - 深度研究模式下能自动多轮搜索、交叉验证，再汇总成结果
+  - 需要登录使用
+  - [访问 exa](https://exa.ai/)
 
 ![exa 搜索界面](./2026-11-10-Better-Claude-Code.assets/image-20261110165446678.png)
 
-Claude 调用操作浏览器 → 换成 Vercel 家的 agent-browser
-
-Claude 内置的浏览器只支持小项目。如果需要真实打开 Chrome、用到用户的登录状态，就用 Vercel 家的 agent-browser——Rust 构建，也没有 chrome-devtools 那种 MCP 的时间和 token 开销。
-
-**[agent-browser](https://github.com/vercel-labs/agent-browser)**
+- **agent-browser**
+  - Claude 内置浏览器只能跑小项目，碰到需要你登录状态的网站就没辙；agent-browser 直接操作你真实的 Chrome，登录态直接复用
+  - Rust 构建，原生 CLI，启动快、响应快
+  - 一条命令能串多个动作（batch），token 开销比 chrome-devtools 低约 10 倍
+  - snapshot 直接输出页面的结构化文本，不用截图就能定位元素
+  - 能连上你已经开着调试端口的 Chrome，接着你正在看的页面继续操作
+  - 还有网络 mock、HAR 录制、录屏、多会话并行这些独有功能
+  - [项目地址](https://github.com/vercel-labs/agent-browser)
 
 ![agent-browser](./2026-11-10-Better-Claude-Code.assets/image-20261110165647928.png)
 
-前端调试开发 → chrome-devtools（现在已改成 plugin）
+- **chrome-devtools**
+  - agent-browser 干不了前端调试的细活，得靠它：性能追踪、Lighthouse 审计、CSS 级联检查、内存堆快照
+  - 性能追踪能直接给出 LCP、INP 等核心指标和优化建议
+  - Lighthouse 一键跑完无障碍、SEO、最佳实践的完整审计
+  - CSS 检查能看到被覆盖的规则，排查样式问题不用开 DevTools 面板
+  - 功能全但慢、token 贵，只在调前端时才切过去用
+  - 现在已经改成 Claude Code Plugin
+  - [项目地址](https://github.com/ChromeDevTools/chrome-devtools-mcp)
 
-chrome-devtools 主要用来辅助前端开发，但比较慢，token 开销也大。
-
-**[chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp)**
-
-![chrome-devtools-mcp](./2026-11-10-Better-Claude-Code.assets/image-20261110170214258.png)
+![chrome-devtools](./2026-11-10-Better-Claude-Code.assets/image-20261110170214258.png)
 
 ## 四、全局 CLAUDE.md
 
