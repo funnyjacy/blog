@@ -65,7 +65,7 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 推荐几个插件和工具，都在实时解决 Claude Code 本身的痛点。
 
-- **GitHub CLI（gh）**
+**GitHub CLI（gh）**
   - 装了它以后，Claude 提 PR、查 Issue、管理仓库全部用命令完成，再也不用你去点 GitHub 网页
   - 创建 PR 只需一条命令，描述还能自动生成，不用手写
   - Issue 的查看、搜索、评论也全在终端里完成
@@ -76,7 +76,7 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 ![GitHub CLI](./2026-11-10-Better-Claude-Code.assets/image-20261110233150217.png)
 
-- **exa**
+**exa**
   - Claude 内置搜索经常搜到过时、没用的内容；换成 exa 后搜出来的东西又全又新，深度研究一个话题终于够用了
   - 返回结果自带 highlights 摘要，不用逐个点开网页就能判断哪篇有用
   - 对技术类查询尤其准，找文档、找博客、找 GitHub 项目都很好用
@@ -87,7 +87,7 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 ![exa 搜索界面](./2026-11-10-Better-Claude-Code.assets/image-20261110165446678.png)
 
-- **agent-browser**
+**agent-browser**
   - Claude 内置浏览器只能跑小项目，碰到需要你登录状态的网站就没辙；agent-browser 直接操作你真实的 Chrome，登录态直接复用
   - Rust 构建，原生 CLI，启动快、响应快
   - 一条命令能串多个动作（batch），token 开销比 chrome-devtools 低约 10 倍
@@ -98,7 +98,7 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 ![agent-browser](./2026-11-10-Better-Claude-Code.assets/image-20261110165647928.png)
 
-- **chrome-devtools**
+**chrome-devtools**
   - agent-browser 干不了前端调试的细活，得靠它：性能追踪、Lighthouse 审计、CSS 级联检查、内存堆快照
   - 性能追踪能直接给出 LCP、INP 等核心指标和优化建议
   - Lighthouse 一键跑完无障碍、SEO、最佳实践的完整审计
