@@ -13,7 +13,8 @@ pubDate: 2026-11-10
 1. [模型选用](#一模型选用)
 2. [Skill](#二skill)
 3. [Plugin 和外部工具 Tool](#三plugin-和外部-tool)
-4. [全局 CLAUDE.md](#四全局-claudemd)
+4. [好用命令 /btw](#四好用命令/btw)
+5. [全局 CLAUDE.md](#五全局-claudemd)
 
 用好 Agent 主要在三个方面：模型选用、Skill、插件和工具。
 
@@ -109,7 +110,13 @@ Claude Code 内置了不少工具，比如读 PPT 和 Word、网络搜索等，�
 
 ![chrome-devtools](./2026-11-10-Better-Claude-Code.assets/image-20261110170214258.png)
 
-## 四、全局 CLAUDE.md
+## 四、好用命令/btw
+
+有时候AI的回答中有一些我们不理解的，但是又不愿意再发一次问题增加上下文让自己看的不方便，那么可以使用/btw，这个命令会读取会话上下文但是不会增加进去，模型在工作的时候也可以使用
+
+![image-20261113174503860](./2026-11-10-Better-Claude-Code.assets/image-20261113174503860.png)
+
+## 五、全局 CLAUDE.md
 
 工具装上之后，Claude 还是会偏向使用自己内置的工具，所以要在全局提示词里强制指定。这是我的部分 CLAUDE.md 全局设置：
 
