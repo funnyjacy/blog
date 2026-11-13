@@ -81,11 +81,6 @@ const songs: Song[] = [
 		<Header />
 		<main>
 			<h1>音乐</h1>
-			<p class="source-note">
-				歌曲来源自 YouTube，播放时可能会有广告，推荐安装
-				<a href="https://adguard.com/" target="_blank" rel="noopener noreferrer">AdGuard</a>
-				插件屏蔽。
-			</p>
 			<ul id="playlist" class="playlist">
 				{
 					songs.map((song, i) => (
@@ -106,6 +101,11 @@ const songs: Song[] = [
 					))
 				}
 			</ul>
+			<p class="source-note">
+				歌曲来源自 YouTube，播放时可能会有广告，推荐安装
+				<a href="https://adguard.com/" target="_blank" rel="noopener noreferrer">AdGuard</a>
+				插件屏蔽。
+			</p>
 		</main>
 		<!-- YouTube 播放器挂载点:被 API 替换成隐藏 iframe,只出声不见画 -->
 		<div id="yt-host" class="yt-host"></div>
@@ -323,7 +323,9 @@ const songs: Song[] = [
 	.source-note {
 		color: rgb(var(--gray-dark));
 		font-size: 0.85em;
-		margin: -0.8em 0 0;
+		margin: 2em 0 0;
+		padding-top: 1em;
+		border-top: 1px solid rgba(var(--black), 8%);
 	}
 	.playlist {
 		list-style: none;
