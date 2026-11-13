@@ -1,0 +1,449 @@
+---
+// 音乐页:歌单硬编码在下面的数组里,加歌/删歌改这里即可。
+// 两种歌曲类型:
+//  - type 'youtube':YouTube 音源(版权歌的合法替代),走 YouTube IFrame API,
+//    视频隐藏只出声,由本页自绘的底部播放栏控制(进度/暂停/切歌)
+//  - type 'url':CC/免版权音频直链,走 <audio>,同一套播放栏控制
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+type Song = {
+	title: string;
+	artist: string;
+	type: 'youtube' | 'url';
+	// youtube: 视频 ID;url: 音频直链
+	src: string;
+	duration?: string;
+	cover?: string;
+	// 添加时间,显示在行最右侧(如 2026-11-13)
+	added?: string;
+};
+
+const songs: Song[] = [
+	{
+		title: '踮起脚尖爱',
+		artist: '洪佩瑜',
+		type: 'youtube',
+		src: 'tLDk2DueeMI',
+		duration: '4:45',
+		cover: 'https://p1.music.126.net/-q7msztpfj0x240RUx8PHA==/109951167145901922.jpg',
+		added: '2026-11-13'
+	}
+];
+---
+
+<!doctype html>
+<html lang="zh-CN" class="music">
+	<head>
+		<BaseHead title={`音乐 - ${SITE_TITLE}`} description={`歌单 - ${SITE_DESCRIPTION}`} />
+		<!-- YouTube IFrame API:异步加载,加载完成后回调 window.onYouTubeIframeAPIReady -->
+		<script is:inline src="https://www.youtube.com/iframe_api" async></script>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>音乐</h1>
+			<ul id="playlist" class="playlist">
+				{
+					songs.map((song, i) => (
+						<li class="song" data-index={i} data-type={song.type} data-src={song.src} role="button" tabindex="0" aria-label={`播放 ${song.title} - ${song.artist}`}>
+							<span class="song-index">
+								<span class="index-num">{i + 1}</span>
+							</span>
+							{song.cover && (
+								<img class="song-cover" src={song.cover} alt={`${song.title} 专辑封面`} width="44" height="44" loading="lazy" />
+							)}
+							<span class="song-title">{song.title}</span>
+							<span class="song-artist">{song.artist}</span>
+							{/* 正在播放时显示在时长左侧的跳动竖条 */}
+							<span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+							<span class="song-duration">{song.duration ?? ''}</span>
+							<span class="song-added">{song.added ?? ''}</span>
+						</li>
+					))
+				}
+			</ul>
+		</main>
+		<!-- YouTube 播放器挂载点:被 API 替换成隐藏 iframe,只出声不见画 -->
+		<div id="yt-host" class="yt-host"></div>
+		<!-- 全局底部播放栏:所有歌共用 -->
+		<div id="player-bar" class="player-bar" hidden>
+			<img id="bar-cover" class="bar-cover" alt="" width="40" height="40" />
+			<div class="bar-info">
+				<span id="now-playing" class="now-playing"></span>
+				<div class="bar-controls">
+					<button id="prev" aria-label="上一首">⏮</button>
+					<button id="play-pause" aria-label="播放/暂停">▶</button>
+					<button id="next" aria-label="下一首">⏭</button>
+					<input id="seek" class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="播放进度" />
+					<span id="time" class="time">0:00 / 0:00</span>
+				</div>
+			</div>
+		</div>
+		<Footer />
+	</body>
+</html>
+
+<script>
+	// 歌单数据从 DOM 读取(Astro 模板渲染,不重复维护一份)
+	const items = Array.from(document.querySelectorAll<HTMLElement>('.song'));
+	const playerBar = document.getElementById('player-bar') as HTMLDivElement;
+	const barCover = document.getElementById('bar-cover') as HTMLImageElement;
+	const nowPlaying = document.getElementById('now-playing') as HTMLSpanElement;
+	const playPauseBtn = document.getElementById('play-pause') as HTMLButtonElement;
+	const seek = document.getElementById('seek') as HTMLInputElement;
+	const timeLabel = document.getElementById('time') as HTMLSpanElement;
+
+	const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+	let current = -1;
+	let ytReady = false;
+	let ytPlayer: YT.Player | null = null;
+	let seeking = false;
+	let timer: ReturnType<typeof setInterval> | null = null;
+
+	declare global {
+		interface Window {
+			onYouTubeIframeAPIReady?: () => void;
+			YT: typeof YT;
+		}
+	}
+
+	// YouTube IFrame API 就绪后创建隐藏播放器
+	window.onYouTubeIframeAPIReady = () => {
+		ytPlayer = new window.YT.Player('yt-host', {
+			height: '1',
+			width: '1',
+			playerVars: { playsinline: 1 }
+		});
+		ytReady = true;
+	};
+
+	function getYtDuration(): number {
+		try {
+			return ytPlayer?.getDuration() || 0;
+		} catch {
+			return 0;
+		}
+	}
+	function getYtTime(): number {
+		try {
+			return ytPlayer?.getCurrentTime() || 0;
+		} catch {
+			return 0;
+		}
+	}
+
+	function isPaused(): boolean {
+		if (current < 0) return true;
+		const song = items[current].dataset;
+		if (song.type === 'youtube') {
+			try {
+				return ytPlayer?.getPlayerState() !== 1; // 1 = PLAYING
+			} catch {
+				return true;
+			}
+		}
+		return (document.getElementById('audio') as HTMLAudioElement).paused;
+	}
+
+	function curTime(): number {
+		return items[current]?.dataset.type === 'youtube' ? getYtTime() : audio().currentTime;
+	}
+	function curDuration(): number {
+		return items[current]?.dataset.type === 'youtube' ? getYtDuration() : audio().duration || 0;
+	}
+	function doSeek(sec: number) {
+		if (items[current].dataset.type === 'youtube') ytPlayer?.seekTo(sec, true);
+		else audio().currentTime = sec;
+	}
+
+	function audio(): HTMLAudioElement {
+		let el = document.getElementById('audio') as HTMLAudioElement | null;
+		if (!el) {
+			el = document.createElement('audio');
+			el.id = 'audio';
+			el.addEventListener('ended', () => playNext());
+			document.body.appendChild(el);
+		}
+		return el;
+	}
+
+	function playPause() {
+		if (current < 0) return;
+		if (isPaused()) {
+			if (items[current].dataset.type === 'youtube') ytPlayer?.playVideo();
+			else audio().play();
+		} else {
+			if (items[current].dataset.type === 'youtube') ytPlayer?.pauseVideo();
+			else audio().pause();
+		}
+	}
+
+	function playSong(index: number) {
+		const item = items[index];
+		if (!item) return;
+		// 换歌前先停掉旧的,清理上一首的高亮
+		try {
+			ytPlayer?.stopVideo();
+		} catch {
+			/* 尚未就绪 */
+		}
+		audio().pause();
+		items.forEach((it) => it.classList.remove('playing'));
+
+		current = index;
+		item.classList.add('playing');
+		playerBar.hidden = false;
+
+		const title = item.querySelector('.song-title')!.textContent;
+		const artist = item.querySelector('.song-artist')!.textContent;
+		nowPlaying.textContent = `${title} - ${artist}`;
+		const cover = item.querySelector<HTMLImageElement>('.song-cover');
+		barCover.src = cover?.src ?? '';
+		barCover.hidden = !cover;
+
+		if (item.dataset.type === 'youtube') {
+			if (!ytReady) {
+				// API 还没加载完:挂一个等就绪后自动播的钩子
+				const old = window.onYouTubeIframeAPIReady;
+				window.onYouTubeIframeAPIReady = () => {
+					old?.();
+					if (current === index && item.dataset.type === 'youtube') ytPlayer?.loadVideoById(item.dataset.src!);
+				};
+			} else {
+				ytPlayer!.loadVideoById(item.dataset.src!);
+			}
+		} else {
+			audio().src = item.dataset.src!;
+			audio().play();
+		}
+
+		// 进度条刷新循环
+		if (!timer) {
+			timer = setInterval(() => {
+				if (current < 0 || seeking) return;
+				const d = curDuration();
+				const t = curTime();
+				if (d > 0) seek.value = String(Math.round((t / d) * 1000));
+				timeLabel.textContent = `${fmt(t)} / ${fmt(d)}`;
+				const paused = isPaused();
+				playPauseBtn.textContent = paused ? '▶' : '⏸';
+			}, 500);
+		}
+	}
+
+	function playNext(offset = 1) {
+		playSong((current + offset + items.length) % items.length);
+	}
+
+	items.forEach((item, i) => {
+		const activate = () => {
+			// 点正在播的歌 = 暂停/继续;点别的歌 = 切歌
+			if (current === i) {
+				playPause();
+			} else {
+				playSong(i);
+			}
+		};
+		item.addEventListener('click', activate);
+		item.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				activate();
+			}
+		});
+	});
+
+	playPauseBtn.addEventListener('click', playPause);
+	document.getElementById('prev')?.addEventListener('click', () => playNext(-1));
+	document.getElementById('next')?.addEventListener('click', () => playNext(1));
+
+	// 进度条:拖动时不被刷新循环覆盖,松手才真正 seek
+	seek.addEventListener('input', () => (seeking = true));
+	seek.addEventListener('change', () => {
+		const d = curDuration();
+		if (d > 0) doSeek((Number(seek.value) / 1000) * d);
+		seeking = false;
+	});
+</script>
+
+<style>
+	main {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 1em 4em;
+	}
+	h1 {
+		padding-top: 1.5em;
+	}
+	.playlist {
+		list-style: none;
+		margin: 1.5em 0;
+		padding: 0;
+	}
+	.song {
+		display: flex;
+		align-items: center;
+		gap: 0.75em;
+		padding: 0.7em 0.9em;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+	.song:hover {
+		background: rgba(var(--black), 6%);
+	}
+	.song-index {
+		min-width: 1.5em;
+		display: flex;
+		justify-content: center;
+		color: rgb(var(--gray-dark));
+		font-variant-numeric: tabular-nums;
+	}
+	/* 均衡器竖条:在时长左侧,播放中显示(占固定宽度,不挤动其他内容) */
+	.eq {
+		display: none;
+		align-items: flex-end;
+		gap: 2px;
+		height: 14px;
+		width: 13px;
+		flex-shrink: 0;
+		/* 离时长远一点,落在歌手和时长之间的空档 */
+		margin-right: 2em;
+	}
+	.eq i {
+		width: 3px;
+		background: var(--accent);
+		animation: eq-bounce 1s ease-in-out infinite;
+	}
+	.eq i:nth-child(1) {
+		height: 40%;
+	}
+	.eq i:nth-child(2) {
+		height: 90%;
+		animation-delay: 0.2s;
+	}
+	.eq i:nth-child(3) {
+		height: 60%;
+		animation-delay: 0.4s;
+	}
+	@keyframes eq-bounce {
+		0%,
+		100% {
+			transform: scaleY(0.4);
+		}
+		50% {
+			transform: scaleY(1);
+		}
+	}
+	.song.playing .eq {
+		display: flex;
+	}
+	.song.playing .song-title {
+		color: var(--accent);
+	}
+	.song-cover {
+		width: 44px;
+		height: 44px;
+		object-fit: cover;
+		border-radius: 6px;
+		display: block;
+	}
+	.song-title {
+		font-weight: 600;
+	}
+	.song-added {
+		color: rgb(var(--gray-dark));
+		font-size: 0.85em;
+		font-variant-numeric: tabular-nums;
+		margin-left: 1em;
+	}
+	.song-artist {
+		color: rgb(var(--gray-dark));
+		flex: 1;
+	}
+	.song-duration {
+		color: rgb(var(--gray-dark));
+		font-variant-numeric: tabular-nums;
+	}
+	/* YouTube 挂载点:移出视口,只出声不见画(display:none 会导致某些浏览器不出声) */
+	.yt-host {
+		position: absolute;
+		left: -9999px;
+		top: 0;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+	/* 全局底部播放栏 */
+	.player-bar {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		gap: 0.8em;
+		padding: 0.6em 1.2em;
+		background: var(--header-bg);
+		box-shadow: 0 -2px 8px rgba(var(--black), 10%);
+	}
+	.player-bar[hidden] {
+		display: none;
+	}
+	.bar-cover {
+		width: 40px;
+		height: 40px;
+		object-fit: cover;
+		border-radius: 6px;
+	}
+	.bar-info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 1em;
+	}
+	.now-playing {
+		font-weight: 600;
+		font-size: 0.9em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 16em;
+	}
+	.bar-controls {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+	.bar-controls button {
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-size: 1.1em;
+		padding: 0.2em 0.4em;
+		color: var(--black);
+	}
+	.seek {
+		flex: 1;
+		accent-color: var(--accent);
+		cursor: pointer;
+	}
+	.time {
+		color: rgb(var(--gray-dark));
+		font-size: 0.85em;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	@media (max-width: 640px) {
+		.now-playing {
+			max-width: 10em;
+		}
+	}
+</style>
