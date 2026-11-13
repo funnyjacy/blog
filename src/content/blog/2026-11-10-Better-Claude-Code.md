@@ -13,7 +13,7 @@ pubDate: 2026-11-10
 1. [模型选用](#一模型选用)
 2. [Skill](#二skill)
 3. [Plugin 和外部工具 Tool](#三plugin-和外部-tool)
-4. [好用命令 /btw](#四好用命令/btw)
+4. [好用命令 /btw](#四好用命令btw)
 5. [全局 CLAUDE.md](#五全局-claudemd)
 
 用好 Agent 主要在三个方面：模型选用、Skill、插件和工具。
