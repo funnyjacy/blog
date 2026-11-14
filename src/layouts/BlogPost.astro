@@ -6,6 +6,8 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import Comment from '../components/Comment.astro';
+// KaTeX 样式表:rehype-katex 只生成 HTML 结构,没有这个 CSS 公式排版会错乱
+import 'katex/dist/katex.min.css';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	prev?: { slug: string; title: string };
