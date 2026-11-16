@@ -7,7 +7,6 @@
 
 :root {
 	--accent: #2337ff;
-	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
 	--gray-light: 229, 233, 240;
@@ -22,7 +21,6 @@
 /* 暗色模式:翻转各灰阶变量即可,组件里全部用变量取色 */
 html.dark {
 	--accent: #7aa2ff;
-	--accent-dark: #a5bcff;
 	--black: 222, 227, 238;
 	--gray: 138, 148, 170;
 	--gray-light: 41, 45, 56;
@@ -50,20 +48,16 @@ body {
 	font-size: 20px;
 	/* 1.7 对中文正文太松,行与行之间割裂感明显 */
 	line-height: 1.6;
-}
-html.dark body {
-	background-color: #16181d;
-}
-/* sticky footer:内容不足一屏时页脚也贴到视口底部 */
-body {
+	/* sticky footer:内容不足一屏时页脚也贴到视口底部 */
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
 }
-main {
-	flex: 1;
+html.dark body {
+	background-color: #16181d;
 }
 main {
+	flex: 1;
 	width: 880px;
 	max-width: calc(100% - 2em);
 	margin: auto;
@@ -165,6 +159,19 @@ hr {
 @media (max-width: 720px) {
 	body {
 		font-size: 18px;
+	}
+	/* 55px 的 h1 在手机上过长标题一行只放几个字,整体缩一档 */
+	h1 {
+		font-size: 1.9em;
+	}
+	h2 {
+		font-size: 1.6em;
+	}
+	h3 {
+		font-size: 1.3em;
+	}
+	h4 {
+		font-size: 1.1em;
 	}
 	main {
 		padding: 1em;

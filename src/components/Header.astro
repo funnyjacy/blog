@@ -98,6 +98,8 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		display: flex;
 		align-items: center;
 		gap: 0.5em;
+		/* 手机窄屏站名不许换行,防止 header 被挤成两三行高 */
+		white-space: nowrap;
 	}
 	.avatar {
 		border-radius: 50%;
@@ -140,5 +142,16 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 	}
 	:global(html.dark) .icon-light {
 		display: none;
+	}
+	/* 手机窄屏:链接 padding 收窄、间距收紧,保证 导航保持单行不换行 */
+	@media (max-width: 480px) {
+		nav a {
+			padding: 0.8em 0.3em;
+			font-size: 0.95em;
+		}
+		.internal-links {
+			display: flex;
+			flex-wrap: nowrap;
+		}
 	}
 </style>
