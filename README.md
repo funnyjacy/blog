@@ -40,6 +40,20 @@
   可与其他属性组合:`(width: 400, class: align-left)`。
 - **注意**:改 `astro.config.mjs` 后 dev server 必须重启才能看到效果,生产构建不受影响。
 
+## 图片图注
+
+想让说明文字显示为图片正下方的居中小字(字号 0.8em、颜色同正文),把图注写成**独立一行、整段只用一对星号包起来**(与图片之间空一行):
+
+  ```markdown
+  ![武汉长江大桥](./xxx.assets/cc05.jpg)
+
+  *长江大桥，还挺好看的*
+  ```
+
+样式在 `src/layouts/BlogPost.astro` 的 `.prose :global(p:has(> em:only-child))` 里调整。
+
+**注意**:图注必须和图片**空一行**独立成段——remark-imgattr 会把图片同一行后面的内容当图片属性解析并删掉,紧挨着写图注会整行消失。
+
 ## 本地预览
 
 ```sh

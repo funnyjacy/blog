@@ -56,6 +56,12 @@ const base = import.meta.env.BASE_URL;
 			.prose :global(img.full) {
 				max-width: 100%;
 			}
+			/* 图注:整段只有一个 *斜体* 的段落 → 居中小字,紧贴上方图片 */
+			.prose :global(p:has(> em:only-child)) {
+				text-align: center;
+				font-size: 0.8em;
+				margin: -0.4em 0 1.2em;
+			}
 			.title {
 				margin-bottom: 1em;
 				padding: 1em 0;
