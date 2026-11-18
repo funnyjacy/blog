@@ -349,7 +349,9 @@ const songs: Song[] = [
 
 <style>
 	main {
-		max-width: 720px;
+		/* 全局 main 有 width:880px,这里上限必须同时限住宽度,
+		   否则手机上 main 固定 720px 整页横向溢出 */
+		max-width: min(720px, calc(100% - 2em));
 		margin: 0 auto;
 		padding: 0 1em 4em;
 	}
@@ -438,6 +440,12 @@ const songs: Song[] = [
 	}
 	.song-title {
 		font-weight: 600;
+		/* 长标题(如"六等星の夜 Magic Blue ver.")不截断会把整行撑出屏幕,
+		   造成手机页面左右拖动;flex 内必须 min-width:0 才能收缩触发省略号 */
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.song-added {
 		color: rgb(var(--gray-dark));
@@ -448,6 +456,11 @@ const songs: Song[] = [
 	.song-artist {
 		color: rgb(var(--gray-dark));
 		flex: 1;
+		/* 歌手名也截断:标题截断后歌手名兜住剩余空间,保证整行不超宽 */
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.song-duration {
 		color: rgb(var(--gray-dark));
@@ -532,6 +545,15 @@ const songs: Song[] = [
 		/* 窄屏隐藏添加日期列,标题+封面+时长才放得下一行 */
 		.song-added {
 			display: none;
+		}
+		/* 窄屏收紧行高:封面 36px + 更小的内边距,点击热区不再占一大条 */
+		.song {
+			padding: 0.4em 0.6em;
+			gap: 0.6em;
+		}
+		.song-cover {
+			width: 36px;
+			height: 36px;
 		}
 	}
 </style>

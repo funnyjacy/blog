@@ -95,18 +95,22 @@ const base = import.meta.env.BASE_URL;
 			.post-nav {
 				margin: 2.5em auto 0;
 				padding: 1em 0 0;
-				/* 三列 grid:两侧各占 1fr,中间列永远真正居中,不因两侧宽度不等被挤偏 */
+				/* 三列 grid:两侧各占 1fr,中间列永远真正居中,不因两侧宽度不等被挤偏。
+				   必须用 minmax(0,1fr):纯 1fr 的列宽会被长标题(最多 22ch ≈ 350px)
+				   撑爆,链接溢出列宽和中间"所有文章"重叠——手机上必撞 */
 				display: grid;
-				grid-template-columns: 1fr auto 1fr;
+				grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 				align-items: center;
 				gap: 1em;
 				border-top: 1px solid rgb(var(--gray-light));
 			}
+			/* 链接撑满整列(stretch),内容靠 flex 对齐——宽度锁死在列宽内,
+			   长标题才能触发省略号;justify-self 会按内容宽度溢出列,不能用在两侧 */
 			.nav-prev {
-				justify-self: start;
+				justify-content: flex-start;
 			}
 			.nav-next {
-				justify-self: end;
+				justify-content: flex-end;
 			}
 			.nav-home {
 				justify-self: center;
@@ -115,6 +119,7 @@ const base = import.meta.env.BASE_URL;
 				display: flex;
 				align-items: center;
 				gap: 0.6em;
+				min-width: 0; /* 允许 flex 内容收缩,长标题才能触发省略号 */
 				color: rgb(var(--gray-dark));
 				text-decoration: none;
 			}
@@ -139,7 +144,9 @@ const base = import.meta.env.BASE_URL;
 			}
 			.nav-title {
 				font-size: 0.9em;
-				max-width: 22ch;
+				/* 上限 22ch 防桌面超宽;min 里带 100% 才能在窄屏真正收缩
+				   (父级 .nav-text 是 flex-start 对齐,子元素不自动拉伸) */
+				max-width: min(22ch, 100%);
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
