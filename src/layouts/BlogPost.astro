@@ -31,8 +31,9 @@ const base = import.meta.env.BASE_URL;
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				/* 宽度交给全局 main(880px),这里只管正文排版 */
-				width: 100%;
+				/* 宽度交给全局 main(880px)。不能写 width:100%:全局没有
+				   border-box,100% + 自身 padding:1em 会超出父容器 2em,
+				   手机上整页出现横向拖动 */
 				margin: auto;
 				padding: 1em;
 				color: rgb(var(--gray-dark));

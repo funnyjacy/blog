@@ -129,6 +129,13 @@ pre {
 	border-radius: 8px;
 	/* 代码块行距比正文紧,1.6 对代码太松散 */
 	line-height: 1.45;
+	/* 长代码行在容器内横向滚动,不许撑破页面宽度(手机上会出现整页拖动) */
+	overflow-x: auto;
+}
+/* KaTeX 公式超宽时自身横向滚动,不撑破页面 */
+.katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
 }
 pre > code {
 	all: unset;
