@@ -1,0 +1,63 @@
+---
+// 404 页:GitHub Pages 会自动用 /404.html 兜底所有不存在的路径
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`404 - ${SITE_TITLE}`} description="页面不存在" />
+	</head>
+	<body>
+		<Header />
+		<main class="notfound">
+			<img class="cat" src={`${base}404-cat.png`} alt="叼走 404 页面的小猫" width="220" height="220" loading="lazy" />
+			<p class="msg">这里空空如也，连灰都不落</p>
+			<p class="hint">你要找的内容可能被猫叼走了</p>
+			<div class="links">
+				<a href={base}>← 回首页</a>
+				<a href={`${base}search/`}>去搜索</a>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.notfound {
+		text-align: center;
+	}
+	.cat {
+		display: block;
+		width: 220px;
+		height: auto;
+		margin: 2em auto 1em;
+	}
+	.msg {
+		font-size: 1.2em;
+		margin: 0 0 0.6em;
+	}
+	.hint {
+		color: rgb(var(--gray));
+		font-size: 0.9em;
+		margin: 0 0 2em;
+	}
+	.links {
+		display: flex;
+		gap: 1.5em;
+		justify-content: center;
+	}
+	.links a {
+		color: var(--accent);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+	}
+	.links a:hover {
+		border-bottom-color: var(--accent);
+	}
+</style>
