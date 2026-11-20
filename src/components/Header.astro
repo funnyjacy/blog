@@ -141,6 +141,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		color: rgb(var(--gray-dark));
 		display: flex;
 		align-items: center;
+		/* nav a 带 4px border-bottom(active 下划线占位),按钮补同宽透明边框,
+		   两边内容区才落在同一中线上 */
+		border-bottom: 4px solid transparent;
+	}
+	.theme-toggle svg {
+		/* 中文字形墨迹比 em 框中心高约 1.4px(375px 视口实测),
+		   图标按 em 框居中会显得偏低,上移 0.08em 补偿 */
+		transform: translateY(-0.1em);
 	}
 	/* 明暗图标只在对应模式下显示 */
 	.icon-dark {
