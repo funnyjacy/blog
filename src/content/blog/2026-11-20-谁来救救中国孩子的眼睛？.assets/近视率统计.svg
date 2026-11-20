@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" font-family="system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif">
+  <rect width="900" height="560" fill="#fcfcfb"/>
+
+  <!-- ===== 面板 1:总体近视率 2018–2025(2023 未单独公布),每根柱顶标注 ===== -->
+  <text x="24" y="34" font-size="15" font-weight="600" fill="#0b0b0b">全国学生总体近视率（2018–2025）</text>
+  <text x="24" y="52" font-size="11" fill="#898781">国家卫健委首次摸底调查 / 国家疾控局监测；2023 年未单独公布（通报称与 2022 年基本持平）</text>
+
+  <g stroke="#e1e0d9" stroke-width="1">
+    <line x1="70" y1="160" x2="830" y2="160"/>
+    <line x1="70" y1="115" x2="830" y2="115"/>
+    <line x1="70" y1="205" x2="830" y2="205"/>
+  </g>
+  <g font-size="11" fill="#898781" text-anchor="end">
+    <text x="62" y="254">0</text>
+    <text x="62" y="209">25</text>
+    <text x="62" y="164">50</text>
+    <text x="62" y="119">75</text>
+    <text x="62" y="74">100%</text>
+  </g>
+
+  <!-- 柱:0–100% 纵轴,1.8px/%;宽 82、间距 30 -->
+  <g fill="#2a78d6">
+    <path d="M70,250 L70,157.5 Q70,153.5 74,153.5 L148,153.5 Q152,153.5 152,157.5 L152,250 Z"/>
+    <path d="M182,250 L182,163.6 Q182,159.6 186,159.6 L260,159.6 Q264,159.6 264,163.6 L264,250 Z"/>
+    <path d="M294,250 L294,159.1 Q294,155.1 298,155.1 L372,155.1 Q376,155.1 376,159.1 L376,250 Z"/>
+    <path d="M406,250 L406,159.3 Q406,155.3 410,155.3 L484,155.3 Q488,155.3 488,159.3 L488,250 Z"/>
+    <path d="M518,250 L518,160.6 Q518,156.6 522,156.6 L596,156.6 Q600,156.6 600,160.6 L600,250 Z"/>
+    <path d="M630,250 L630,163.5 Q630,159.5 634,159.5 L708,159.5 Q712,159.5 712,163.5 L712,250 Z"/>
+    <path d="M742,250 L742,164.2 Q742,160.2 746,160.2 L820,160.2 Q824,160.2 824,164.2 L824,250 Z"/>
+  </g>
+  <line x1="70" y1="250" x2="830" y2="250" stroke="#c3c2b7" stroke-width="1"/>
+
+  <!-- 每根柱顶标注 -->
+  <g font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">
+    <text x="111" y="146">53.6%</text>
+    <text x="223" y="152">50.2%</text>
+    <text x="335" y="148">52.7%</text>
+    <text x="447" y="148">52.6%</text>
+    <text x="559" y="149">51.9%</text>
+    <text x="671" y="152">50.3%</text>
+    <text x="783" y="153">49.9%</text>
+  </g>
+  <g font-size="12" fill="#52514e" text-anchor="middle">
+    <text x="111" y="270">2018</text>
+    <text x="223" y="270">2019</text>
+    <text x="335" y="270">2020</text>
+    <text x="447" y="270">2021</text>
+    <text x="559" y="270">2022</text>
+    <text x="671" y="270">2024</text>
+    <text x="783" y="270">2025</text>
+  </g>
+
+  <!-- ===== 面板 2:2022 分学段,每根柱顶标注 ===== -->
+  <text x="24" y="318" font-size="15" font-weight="600" fill="#0b0b0b">2022 年分学段近视率</text>
+
+  <g stroke="#e1e0d9" stroke-width="1">
+    <line x1="70" y1="375" x2="830" y2="375"/>
+    <line x1="70" y1="420" x2="830" y2="420"/>
+    <line x1="70" y1="465" x2="830" y2="465"/>
+  </g>
+  <g font-size="11" fill="#898781" text-anchor="end">
+    <text x="62" y="514">0</text>
+    <text x="62" y="469">25</text>
+    <text x="62" y="424">50</text>
+    <text x="62" y="379">75</text>
+    <text x="62" y="334">100%</text>
+  </g>
+
+  <g>
+    <path d="M150,510 L150,447.9 Q150,443.9 154,443.9 L306,443.9 Q310,443.9 310,447.9 L310,510 Z" fill="#86b6ef"/>
+    <path d="M370,510 L370,385.5 Q370,381.5 374,381.5 L526,381.5 Q530,381.5 530,385.5 L530,510 Z" fill="#2a78d6"/>
+    <path d="M590,510 L590,367.8 Q590,363.8 594,363.8 L746,363.8 Q750,363.8 750,367.8 L750,510 Z" fill="#184f95"/>
+  </g>
+  <line x1="70" y1="510" x2="830" y2="510" stroke="#c3c2b7" stroke-width="1"/>
+
+  <g font-size="13" font-weight="600" fill="#0b0b0b" text-anchor="middle">
+    <text x="230" y="436">36.7%</text>
+    <text x="450" y="373">71.4%</text>
+    <text x="670" y="356" font-size="14" font-weight="700">81.2%</text>
+  </g>
+  <g font-size="12" fill="#52514e" text-anchor="middle">
+    <text x="230" y="530">小学</text>
+    <text x="450" y="530">初中</text>
+    <text x="670" y="530">高中</text>
+  </g>
+
+  <text x="24" y="548" font-size="11" fill="#898781">数据来源：国家疾控局监测数据（2022 分学段）；2024、2025 年数据来自国家疾控局 2026 年 9 月新闻发布会</text>
+</svg>
