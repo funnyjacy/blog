@@ -1,6 +1,7 @@
 ---
 // 音乐页:歌单数据在 src/data/songs.js,加歌/删歌改那里即可。
 import BaseHead from '../components/BaseHead.astro';
+import Comment from '../components/Comment.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
@@ -19,7 +20,10 @@ import songs from '../data/songs.js';
 	<body>
 		<Header />
 		<main>
-			<h1>音乐</h1>
+			<div class="page-head">
+				<h1>音乐</h1>
+				<p class="tagline">隔着千里，也能在同一首歌里相遇</p>
+			</div>
 			<ul id="playlist" class="playlist">
 				{
 					songs.map((song, i) => (
@@ -45,6 +49,7 @@ import songs from '../data/songs.js';
 				<a href="https://adguard.com/" target="_blank" rel="noopener noreferrer">AdGuard</a>
 				插件屏蔽。
 			</p>
+			<Comment />
 		</main>
 		<!-- YouTube 播放器挂载点:被 API 替换成隐藏 iframe,只出声不见画 -->
 		<div id="yt-host" class="yt-host"></div>
@@ -260,6 +265,30 @@ import songs from '../data/songs.js';
 	}
 	h1 {
 		padding-top: 1.5em;
+	}
+	/* 标题 + 右侧小诗:桌面端同一行,诗句靠右;窄屏自动换到标题下方 */
+	.page-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.4em 1.5em;
+	}
+	/* 标题用楷体。注意不能加粗:楷体没有粗体字重,浏览器会合成假粗,
+	   笔画糊成一团反而像宋体;正常字重 + 大字号才是楷体的笔意 */
+	.page-head h1 {
+		margin: 0.15em 0 0;
+		font-family: KaiTi, STKaiti, 'Kaiti SC', '楷体', serif;
+		font-size: 2.6em;
+		font-weight: 400;
+		letter-spacing: 0.12em;
+	}
+	.tagline {
+		margin: 0;
+		font-family: SimSun, STSong, 'Songti SC', '宋体', serif;
+		font-size: 0.9em;
+		letter-spacing: 0.1em;
+		color: rgb(var(--gray));
 	}
 	.source-note {
 		color: rgb(var(--gray-dark));
