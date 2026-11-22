@@ -28,12 +28,41 @@ const posts = (await getCollection('blog')).sort(
 								<FormattedDate date={post.data.pubDate} />
 							</span>
 							<a href={`${base}${post.id}/`}>{post.data.title}</a>
+							<span class="comment-count" data-path={`${base}${post.id}/`} hidden></span>
 						</li>
 					))
 				}
 			</ul>
 		</main>
 		<Footer />
+		<script>
+			// 留言数:giscus 的讨论就是仓库里的 GitHub Discussions,公开 REST 接口无需 token。
+			// 一次拉全部讨论按标题匹配文章路径;失败=不显示(与 0 评论视觉一致)。
+			// 讨论标题形如 "blog/2026-11-06-hello/"(无前导斜杠,中文为百分号编码),归一化后再比。
+			// 注意:无 token 限流为每 IP 每小时 60 次。
+			const list = document.querySelectorAll<HTMLElement>('.comment-count');
+			const norm = (p: string) => {
+				try {
+					return decodeURIComponent(p).replace(/^\/+/, '');
+				} catch {
+					return p.replace(/^\/+/, '');
+				}
+			};
+			if (list.length) {
+				fetch('https://api.github.com/repos/funnyjacy/blog/discussions?per_page=100')
+					.then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+					.then((discussions: Array<{ title: string; comments: number }>) => {
+						const counts = new Map(discussions.map((d) => [norm(d.title), d.comments]));
+						list.forEach((el) => {
+							const n = counts.get(norm(el.dataset.path ?? ''));
+							if (n === undefined || n === 0) return;
+							el.textContent = `💬 ${n}`;
+							el.hidden = false;
+						});
+					})
+					.catch(() => {});
+			}
+		</script>
 	</body>
 </html>
 
@@ -52,6 +81,10 @@ const posts = (await getCollection('blog')).sort(
 		gap: 0.75em;
 		padding: 0.35em 0;
 	}
+	.post-list li > a {
+		/* 标题占满剩余空间,评论数因此被推到行尾右对齐 */
+		flex: 1;
+	}
 	.date {
 		flex-shrink: 0;
 		/* 固定宽度:一位数和两位数日期宽度不同,不给定宽标题起点会跟着错位 */
@@ -59,5 +92,12 @@ const posts = (await getCollection('blog')).sort(
 		font-size: 0.8em;
 		color: rgb(var(--gray));
 		font-variant-numeric: tabular-nums;
+	}
+	.comment-count {
+		flex-shrink: 0;
+		font-size: 0.8em;
+		color: rgb(var(--gray));
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
 	}
 </style>
