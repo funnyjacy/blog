@@ -129,5 +129,14 @@ export default [
 		duration: '3:17',
 		cover: 'https://p1.music.126.net/BZZooR0SG8_wxlU3-r2FOg==/109951169986890730.jpg',
 		added: '2026-11-19'
+	},
+	{
+		title: 'A Thousand Years',
+		artist: 'Christina Perri',
+		type: 'youtube',
+		src: 'rtOvBOTyX00',
+		duration: '4:48',
+		cover: 'https://p1.music.126.net/3b9Qtu_aVyGvJiz60M0ACw==/109951167587259721.jpg',
+		added: '2026-11-21'
 	}
 ];
