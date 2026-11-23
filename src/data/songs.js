@@ -113,7 +113,7 @@ export default [
 		added: '2026-11-19'
 	},
 	{
-		title: '安妮的仙境',
+		title: "Annie's Wonderland",
 		artist: 'Bandari',
 		type: 'youtube',
 		src: 'taz3AFYzAmQ',
@@ -138,5 +138,15 @@ export default [
 		duration: '4:48',
 		cover: 'https://p1.music.126.net/3b9Qtu_aVyGvJiz60M0ACw==/109951167587259721.jpg',
 		added: '2026-11-21'
+	},
+	{
+		title: '海枯石烂',
+		artist: 'Olivia Ong',
+		type: 'youtube',
+		src: 'b5EFKNmeovM',
+		duration: '4:55',
+		// 封面:Spotify《Romance》(王儷婷) 官方专辑封面,存本地避免直链失效
+		cover: '/blog/covers/haikushilan.jpg',
+		added: '2026-11-23'
 	}
 ];
