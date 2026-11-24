@@ -148,5 +148,25 @@ export default [
 		// 封面:Spotify《Romance》(王儷婷) 官方专辑封面,存本地避免直链失效
 		cover: '/blog/covers/haikushilan.jpg',
 		added: '2026-11-23'
+	},
+	{
+		title: 'Date',
+		artist: 'RADWIMPS',
+		type: 'youtube',
+		src: 'FtMhJH_rui4',
+		duration: '4:05',
+		// 封面:Spotify《Your Name.》官方专辑封面
+		cover: '/blog/covers/date.jpg',
+		added: '2026-11-23'
+	},
+	{
+		title: 'Big Big World',
+		artist: 'Emilia',
+		type: 'youtube',
+		src: 'wpkS2DU_qMs',
+		duration: '3:34',
+		// 封面:Spotify《Big Big World》官方专辑封面
+		cover: '/blog/covers/bigbigworld.jpg',
+		added: '2026-11-23'
 	}
 ];
