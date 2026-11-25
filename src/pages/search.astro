@@ -23,13 +23,20 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		<Footer />
 		<script is:inline src={`${base}pagefind/pagefind-ui.js`}></script>
 		<script is:inline>
-			window.addEventListener('DOMContentLoaded', () => {
+			// SPA 导航(ClientRouter)进本页时 DOMContentLoaded 不会再触发,
+			// 改用 astro:page-load(首次加载与每次 SPA 换页都会触发)。
+			// PagefindUI 不能重复初始化,容器里已有内容就直接跳过。
+			function initSearch() {
+				const el = document.getElementById('search');
+				if (!el || el.firstElementChild) return;
 				new PagefindUI({
-		element: '#search',
-		showSubResults: true,
-		translations: { clear_search: '清空' },
-	});
-			});
+					element: '#search',
+					showSubResults: true,
+					translations: { clear_search: '清空' },
+				});
+			}
+			window.addEventListener('DOMContentLoaded', initSearch);
+			document.addEventListener('astro:page-load', initSearch);
 		</script>
 	</body>
 </html>
