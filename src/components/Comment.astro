@@ -26,6 +26,22 @@ const enabled = Boolean(GISCUS.repo && GISCUS.repoId && GISCUS.categoryId);
 				crossorigin="anonymous"
 				async
 			/>
+			<script is:inline>
+				// SPA 导航(ClientRouter)后脚本不重跑,giscus 的 iframe 不会被重建。
+				// astro:page-load 在首次加载和每次 SPA 换页后都触发;已有 iframe 则跳过。
+				// client.js 重新执行才会建 iframe,而浏览器对同 URL 的经典脚本插入也不会
+				// 二次执行,所以克隆一份带 data-* 的脚本节点插回去,强制重新加载执行。
+				function initComments() {
+					const section = document.querySelector('.comments');
+					if (!section || section.querySelector('iframe')) return;
+					const src = section.querySelector('script[src*="giscus.app/client.js"]');
+					if (!src) return;
+					const clone = document.createElement('script');
+					for (const attr of src.attributes) clone.setAttribute(attr.name, attr.value);
+					section.appendChild(clone);
+				}
+				document.addEventListener('astro:page-load', initComments);
+			</script>
 		</section>
 	)
 }

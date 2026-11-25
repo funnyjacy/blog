@@ -12,8 +12,8 @@ export default defineConfig({
 	// GitHub Pages 项目站:https://funnyjacy.github.io/blog/
 	site: 'https://funnyjacy.github.io',
 	base: '/blog',
-	// 悬停预取:鼠标碰到站内链接就提前下载目标页,点击时几乎瞬时
-	prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
+	// 视口预取:进入首屏的站内链接全部提前拉取,点导航必命中缓存,零等待
+	prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		remarkPlugins: [remarkImgattr, remarkMath],
