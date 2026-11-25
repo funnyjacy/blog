@@ -52,33 +52,28 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 	// 处理器提到模块顶层:每次 page-load 绑的是同一函数引用,不会重复绑
 	function themeClick(e: Event) {
 		const dark = !document.documentElement.classList.contains('dark');
-		// 不支持 View Transition 或系统开了减少动效:瞬间切换
+		// 全屏温和渐变:用 View Transition 的默认交叉淡化(旧画面淡出、新画面淡入),
+		// 不做任何 clip-path 扩散。不用逐属性 transition 是因为 background-image
+		// (body 顶部的 linear-gradient)不可过渡,会瞬间跳变形成折线;且过渡结束
+		// 摘 class 时整页重绘会让字体闪烁。VT 截图淡化没有这两个问题。
+		// 不支持 VT 或系统开了减少动效:瞬间切换
 		if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
 			applyTheme(dark);
 			return;
 		}
-		const root = document.documentElement;
-		// 记下按钮位置,作为圆形扩散的圆心
-		const { clientX: x, clientY: y } = e as MouseEvent;
-		// 半径取"圆心到最远角落"的距离,保证扩散能盖住全屏
-		const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-		root.style.setProperty('--theme-x', `${x}px`);
-		root.style.setProperty('--theme-y', `${y}px`);
-		root.style.setProperty('--theme-r', `${radius}px`);
 		document.startViewTransition(() => applyTheme(dark));
 	}
 
 	bindThemeToggle();
 	document.addEventListener('astro:page-load', bindThemeToggle);
-	bindThemeToggle();
-	document.addEventListener('astro:page-load', bindThemeToggle);
 </script>
 
 <style>
-	/* 圆形扩散切换动画:旧画面静止在底层,新画面用 clip-path 从按钮位置扩开 */
+	/* 主题切换的全屏温和渐变:View Transition 默认的交叉淡化。
+	   覆盖默认动画时长为 450ms ease;e 参数未用但保留签名与旧版一致 */
 	:global(::view-transition-old(root)),
 	:global(::view-transition-new(root)) {
-		animation: none;
+		animation: none; /* 关掉各自的默认动画 */
 		mix-blend-mode: normal;
 	}
 	:global(::view-transition-old(root)) {
@@ -86,14 +81,14 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 	}
 	:global(::view-transition-new(root)) {
 		z-index: 2;
-		animation: theme-spread 300ms ease-in both;
+		animation: theme-fade 450ms ease both;
 	}
-	@keyframes theme-spread {
+	@keyframes theme-fade {
 		from {
-			clip-path: circle(0 at var(--theme-x) var(--theme-y));
+			opacity: 0;
 		}
 		to {
-			clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y));
+			opacity: 1;
 		}
 	}
 
