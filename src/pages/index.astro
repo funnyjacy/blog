@@ -40,28 +40,53 @@ const posts = (await getCollection('blog')).sort(
 			// 一次拉全部讨论按标题匹配文章路径;失败=不显示(与 0 评论视觉一致)。
 			// 讨论标题形如 "blog/2026-11-06-hello/"(无前导斜杠,中文为百分号编码),归一化后再比。
 			// 注意:无 token 限流为每 IP 每小时 60 次。
-			const list = document.querySelectorAll<HTMLElement>('.comment-count');
-			const norm = (p: string) => {
+			// SPA 导航(ClientRouter)后模块脚本不重跑,包装成函数监听 astro:page-load,
+			// 每次回到首页都重新执行;首次加载时该事件也会触发,不会被跳过。
+			// 结果缓存进 sessionStorage,10 分钟内回到首页直接用缓存,不再打 GitHub API;
+			// sessionStorage 按标签页隔离,关标签页即清,存不进/损坏时按无缓存处理。
+			const CACHE_KEY = 'comment-counts';
+			const CACHE_TTL = 10 * 60 * 1000;
+			function loadCommentCounts() {
+				const list = document.querySelectorAll<HTMLElement>('.comment-count');
+				if (!list.length) return;
+				const norm = (p: string) => {
+					try {
+						return decodeURIComponent(p).replace(/^\/+/, '');
+					} catch {
+						return p.replace(/^\/+/, '');
+					}
+				};
+				const apply = (counts: Map<string, number>) => {
+					list.forEach((el) => {
+						const n = counts.get(norm(el.dataset.path ?? ''));
+						if (n === undefined || n === 0) return;
+						el.textContent = `💬 ${n}`;
+						el.hidden = false;
+					});
+				};
 				try {
-					return decodeURIComponent(p).replace(/^\/+/, '');
+					const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) ?? 'null');
+					if (cached && Date.now() - cached.t < CACHE_TTL) {
+						apply(new Map(cached.counts));
+						return;
+					}
 				} catch {
-					return p.replace(/^\/+/, '');
+					/* 缓存损坏按无缓存处理 */
 				}
-			};
-			if (list.length) {
 				fetch('https://api.github.com/repos/funnyjacy/blog/discussions?per_page=100')
 					.then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
 					.then((discussions: Array<{ title: string; comments: number }>) => {
 						const counts = new Map(discussions.map((d) => [norm(d.title), d.comments]));
-						list.forEach((el) => {
-							const n = counts.get(norm(el.dataset.path ?? ''));
-							if (n === undefined || n === 0) return;
-							el.textContent = `💬 ${n}`;
-							el.hidden = false;
-						});
+						try {
+							sessionStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), counts: [...counts] }));
+						} catch {
+							/* 存不进就算了,不影响显示 */
+						}
+						apply(counts);
 					})
 					.catch(() => {});
 			}
+			document.addEventListener('astro:page-load', loadCommentCounts);
 		</script>
 	</body>
 </html>
