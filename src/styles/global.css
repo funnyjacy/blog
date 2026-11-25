@@ -98,6 +98,15 @@ a {
 a:hover {
 	color: var(--accent);
 }
+/* 正文里的链接去掉常驻下划线,hover 时才出现——列表页整屏蓝色下划线的视觉噪音太大 */
+.prose a,
+.post-list a {
+	text-decoration: none;
+}
+.prose a:hover,
+.post-list a:hover {
+	text-decoration: underline;
+}
 p {
 	margin-bottom: 1em;
 }
@@ -183,6 +192,32 @@ hr {
 	main {
 		padding: 1em;
 	}
+}
+
+/* 细滚动条,颜色跟随明暗主题(Firefox 用 scrollbar-*，Chromium 用 ::-webkit-scrollbar) */
+html {
+	scrollbar-width: thin;
+	scrollbar-color: rgb(var(--gray) / 50%) transparent;
+}
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-thumb {
+	background: rgb(var(--gray) / 50%);
+	border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgb(var(--gray) / 75%);
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* 选中文字用强调色底、纸色字,替换系统默认蓝 */
+::selection {
+	background: var(--accent);
+	color: #fff;
 }
 
 .sr-only {
