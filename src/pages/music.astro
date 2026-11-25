@@ -72,23 +72,10 @@ import songs from '../data/songs.js';
 </html>
 
 <script>
-	// 歌单数据从 DOM 读取(Astro 模板渲染,不重复维护一份)
-	const items = Array.from(document.querySelectorAll<HTMLElement>('.song'));
-	const playerBar = document.getElementById('player-bar') as HTMLDivElement;
-	const barCover = document.getElementById('bar-cover') as HTMLImageElement;
-	const nowPlaying = document.getElementById('now-playing') as HTMLSpanElement;
-	const playPauseBtn = document.getElementById('play-pause') as HTMLButtonElement;
-	const seek = document.getElementById('seek') as HTMLInputElement;
-	const timeLabel = document.getElementById('time') as HTMLSpanElement;
-
-	const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-
-	let current = -1;
-	let ytReady = false;
-	let ytPlayer: YT.Player | null = null;
-	let seeking = false;
-	let timer: ReturnType<typeof setInterval> | null = null;
-
+	// SPA 导航(ClientRouter)下模块脚本整站只执行一次,所有状态和监听都活在
+	// 模块作用域里;换页后旧 DOM 被销毁,这里的引用全部失效。
+	// 做法:状态保留在模块级(离开音乐页不清空,回来还能接着播),
+	// 但每次 astro:page-load 进音乐页时,把绑定重新挂到当前文档的节点上。
 	declare global {
 		interface Window {
 			onYouTubeIframeAPIReady?: () => void;
@@ -96,7 +83,25 @@ import songs from '../data/songs.js';
 		}
 	}
 
-	// YouTube IFrame API 就绪后创建隐藏播放器
+	// ---- 模块级状态(跨换页存活) ----
+	let current = -1;
+	let ytReady = false;
+	let ytPlayer: YT.Player | null = null;
+	let seeking = false;
+	let timer: ReturnType<typeof setInterval> | null = null;
+	// 换页后的新 DOM 引用,每次进音乐页重新赋值
+	let items: HTMLElement[] = [];
+	let playerBar: HTMLDivElement;
+	let barCover: HTMLImageElement;
+	let nowPlaying: HTMLSpanElement;
+	let playPauseBtn: HTMLButtonElement;
+	let seek: HTMLInputElement;
+	let timeLabel: HTMLSpanElement;
+
+	const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+	// YouTube IFrame API 就绪后创建隐藏播放器。回调只此一份(本脚本不重跑),
+	// 就绪前 ytPlayer 是 null,playSong 里有"等就绪后自动播"的钩子兜底
 	window.onYouTubeIframeAPIReady = () => {
 		ytPlayer = new window.YT.Player('yt-host', {
 			height: '1',
@@ -105,6 +110,24 @@ import songs from '../data/songs.js';
 		});
 		ytReady = true;
 	};
+
+	// 换页回到音乐页时,若 API 早已就绪但 ytPlayer 指向旧文档已销毁的 iframe,
+	// 在新文档的 yt-host 上重建播放器;还活着则复用
+	function ensurePlayer() {
+		if (!ytReady) return;
+		const host = document.getElementById('yt-host');
+		if (ytPlayer && host?.tagName === 'IFRAME') {
+			try {
+				ytPlayer.getDuration();
+				return; // 现有 player 还能用
+			} catch {
+				/* 旧 player 已死,落到重建 */
+			}
+		}
+		ytPlayer = new window.YT.Player('yt-host', {
+			playerVars: { playsinline: 1 }
+		});
+	}
 
 	function getYtDuration(): number {
 		try {
@@ -224,35 +247,66 @@ import songs from '../data/songs.js';
 		playSong((current + offset + items.length) % items.length);
 	}
 
-	items.forEach((item, i) => {
-		const activate = () => {
-			// 点正在播的歌 = 暂停/继续;点别的歌 = 切歌
-			if (current === i) {
-				playPause();
-			} else {
-				playSong(i);
+	// ---- 每次进音乐页执行的初始化:重新抓 DOM、绑事件 ----
+	function initMusicPage() {
+		// 不在音乐页(换到别的页面)时,若正在播则继续后台播,只解除高亮
+		if (!document.getElementById('yt-host')) {
+			if (current >= 0 && timer) return; // 还在播,保留状态继续刷进度
+			if (timer) {
+				clearInterval(timer);
+				timer = null;
 			}
-		};
-		item.addEventListener('click', activate);
-		item.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				activate();
-			}
+			return;
+		}
+		ensurePlayer();
+
+		items = Array.from(document.querySelectorAll<HTMLElement>('.song'));
+		playerBar = document.getElementById('player-bar') as HTMLDivElement;
+		barCover = document.getElementById('bar-cover') as HTMLImageElement;
+		nowPlaying = document.getElementById('now-playing') as HTMLSpanElement;
+		playPauseBtn = document.getElementById('play-pause') as HTMLButtonElement;
+		seek = document.getElementById('seek') as HTMLInputElement;
+		timeLabel = document.getElementById('time') as HTMLSpanElement;
+
+		items.forEach((item, i) => {
+			const activate = () => {
+				// 点正在播的歌 = 暂停/继续;点别的歌 = 切歌
+				if (current === i) {
+					playPause();
+				} else {
+					playSong(i);
+				}
+			};
+			item.addEventListener('click', activate);
+			item.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					activate();
+				}
+			});
 		});
-	});
 
-	playPauseBtn.addEventListener('click', playPause);
-	document.getElementById('prev')?.addEventListener('click', () => playNext(-1));
-	document.getElementById('next')?.addEventListener('click', () => playNext(1));
+		playPauseBtn.addEventListener('click', playPause);
+		document.getElementById('prev')?.addEventListener('click', () => playNext(-1));
+		document.getElementById('next')?.addEventListener('click', () => playNext(1));
 
-	// 进度条:拖动时不被刷新循环覆盖,松手才真正 seek
-	seek.addEventListener('input', () => (seeking = true));
-	seek.addEventListener('change', () => {
-		const d = curDuration();
-		if (d > 0) doSeek((Number(seek.value) / 1000) * d);
-		seeking = false;
-	});
+		// 进度条:拖动时不被刷新循环覆盖,松手才真正 seek
+		seek.addEventListener('input', () => (seeking = true));
+		seek.addEventListener('change', () => {
+			const d = curDuration();
+			if (d > 0) doSeek((Number(seek.value) / 1000) * d);
+			seeking = false;
+		});
+
+		// 换页回来时正在播:恢复高亮和播放栏(条目顺序跨换页一致,按索引映射)
+		if (current >= 0 && items[current]) {
+			items[current].classList.add('playing');
+			playerBar.hidden = false;
+		}
+	}
+
+	document.addEventListener('astro:page-load', initMusicPage);
+	initMusicPage();
 </script>
 
 <style>

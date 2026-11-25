@@ -235,24 +235,31 @@ const base = import.meta.env.BASE_URL;
 		</main>
 		<Footer />
 		<script>
-			// 代码块右上角复制按钮:纯原生 JS,给每个 pre 包一层定位容器并注入按钮
-			for (const pre of document.querySelectorAll('.prose pre')) {
-				const wrap = document.createElement('div');
-				wrap.className = 'pre-wrap';
-				pre.parentNode.insertBefore(wrap, pre);
-				wrap.appendChild(pre);
+			// 代码块右上角复制按钮:纯原生 JS,给每个 pre 包一层定位容器并注入按钮。
+			// SPA 导航(ClientRouter)换页后模块脚本只执行一次,改由 astro:page-load
+			// 驱动(首载和每次换页都触发);已包了 wrap 的 pre 直接跳过,防止重复注入
+			function injectCopyButtons() {
+				for (const pre of document.querySelectorAll('.prose pre')) {
+					if (pre.parentNode.classList?.contains('pre-wrap')) continue;
+					const wrap = document.createElement('div');
+					wrap.className = 'pre-wrap';
+					pre.parentNode.insertBefore(wrap, pre);
+					wrap.appendChild(pre);
 
-				const btn = document.createElement('button');
-				btn.className = 'copy-btn';
-				btn.type = 'button';
-				btn.textContent = 'Copy';
-				btn.addEventListener('click', async () => {
-					const ok = await copyText(pre.innerText);
-					btn.textContent = ok ? '已复制' : '复制失败';
-					setTimeout(() => (btn.textContent = 'Copy'), 1500);
-				});
-				wrap.appendChild(btn);
+					const btn = document.createElement('button');
+					btn.className = 'copy-btn';
+					btn.type = 'button';
+					btn.textContent = 'Copy';
+					btn.addEventListener('click', async () => {
+						const ok = await copyText(pre.innerText);
+						btn.textContent = ok ? '已复制' : '复制失败';
+						setTimeout(() => (btn.textContent = 'Copy'), 1500);
+					});
+					wrap.appendChild(btn);
+				}
 			}
+			injectCopyButtons();
+			document.addEventListener('astro:page-load', injectCopyButtons);
 
 			// 优先用 async Clipboard API,被拒(如 iframe/权限)时退回 execCommand 兜底
 			async function copyText(text) {

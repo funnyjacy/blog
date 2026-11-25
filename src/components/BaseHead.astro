@@ -59,6 +59,31 @@ const { title, description, image = FallbackImage } = Astro.props;
 	document.addEventListener('astro:after-swap', applyThemeClass);
 </script>
 
+<!-- 导航高亮:构建时算死的 active class 在 SPA 换页后不适用(文章页不匹配任何导航),
+     每次换页后按当前路径重算;文章页归"首页"名下(文章列表就在首页)。
+     is:inline 保证每次换页都重新执行(Astro 会用 data-astro-rerun 语义处理) -->
+<script is:inline data-astro-rerun>
+	function updateActiveNav() {
+		const norm = (p) => p.replace(/\/+$/, '') || '/';
+		const path = norm(location.pathname);
+		const isPost =
+			/^\/blog\/.+/.test(location.pathname) &&
+			!['/blog/about/', '/blog/music/', '/blog/search/'].some((p) =>
+				location.pathname.startsWith(p),
+			);
+		// 文章页归"首页"名下;首页 href 带 base 前缀,归一化后是 '/blog'
+		const homeHref = norm(document.querySelector('a[data-nav-href="/blog/"]')?.dataset.navHref ?? '');
+		document.querySelectorAll('a[data-nav-href]').forEach((a) => {
+			const href = norm(a.dataset.navHref ?? '');
+			// 首页链接的 href 带 base 前缀(如 /blog/),归一化后是 '/blog' 不是 '/',
+			// 与 Astro.url 算出来的 base 一致;文章页归它名下
+			a.classList.toggle('active', path === href || (isPost && href === homeHref));
+		});
+	}
+	updateActiveNav();
+	document.addEventListener('astro:page-load', updateActiveNav);
+</script>
+
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 

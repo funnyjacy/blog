@@ -42,7 +42,15 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		localStorage.setItem('theme', dark ? 'dark' : 'light');
 	}
 
-	document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
+	// SPA 导航(ClientRouter)换页后 header 是全新 DOM,模块脚本只执行一次,
+	// 旧监听随旧节点一起丢弃;astro:page-load 首载和每次换页都触发,
+	// 给当前 #theme-toggle 重新绑监听(addEventListener 同函数引用不会重复绑)。
+	function bindThemeToggle() {
+		document.getElementById('theme-toggle')?.addEventListener('click', themeClick);
+	}
+
+	// 处理器提到模块顶层:每次 page-load 绑的是同一函数引用,不会重复绑
+	function themeClick(e: Event) {
 		const dark = !document.documentElement.classList.contains('dark');
 		// 不支持 View Transition 或系统开了减少动效:瞬间切换
 		if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -58,7 +66,12 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		root.style.setProperty('--theme-y', `${y}px`);
 		root.style.setProperty('--theme-r', `${radius}px`);
 		document.startViewTransition(() => applyTheme(dark));
-	});
+	}
+
+	bindThemeToggle();
+	document.addEventListener('astro:page-load', bindThemeToggle);
+	bindThemeToggle();
+	document.addEventListener('astro:page-load', bindThemeToggle);
 </script>
 
 <style>
