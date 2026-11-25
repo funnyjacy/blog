@@ -84,6 +84,50 @@ const { title, description, image = FallbackImage } = Astro.props;
 	document.addEventListener('astro:page-load', updateActiveNav);
 </script>
 
+<!-- 换页内容浮现(antfu.me 同款 slide-enter):每次换页后给 main 的关键子元素
+     按序标 --enter-stage,配合 global.css 里的 keyframes 逐级淡入上浮。
+     每页结构不同,按页面类型分别取候选元素;按 DOM 出现顺序分级。
+     is:inline + data-astro-rerun 保证 SPA 换页后重新执行(重新标注即重放动画) -->
+<script is:inline data-astro-rerun>
+	function markEnterStages() {
+		const main = document.querySelector('main');
+		if (!main) return;
+		// 点了导航里当前页自己的链接:ClientRouter 仍会 swap + 触发 page-load,
+		// 内容没变,重标只会让动画凭空重播 → 同 URL 直接跳过。
+		// 标记挂 window:swap 换文档但 window 不换,挂函数属性会随脚本重跑而丢
+		const url = location.pathname + location.search;
+		if (url === window.__enterLastUrl) return;
+		window.__enterLastUrl = url;
+		// 各类页面的进场元素候选:文章页取 hero/标题区/正文/评论等大块,
+		// 首页取标题+列表,音乐页取标题/歌单/播放器,通用页直接取 main 顶层子元素
+		let candidates;
+		const post = document.querySelector('article .prose');
+		if (post) {
+			candidates = [
+				document.querySelector('article .hero-image'),
+				post.querySelector('.title'),
+				...post.querySelectorAll(':scope > p, :scope > hr, :scope > pre, :scope > div, :scope > nav.post-nav, :scope > section.comments'),
+			];
+		} else {
+			// 通用页(关于/搜索等):main 顶层子元素整体按序浮;
+			// 首页/音乐页另把列表条目逐条分级,形成标题→列表→条目的层次
+			candidates = [
+				...document.querySelectorAll('main > *'),
+				...document.querySelectorAll('main .post-list li, main .playlist li'),
+			];
+		}
+		let stage = 0;
+		// 只保留真实存在、还在文档里的元素;直接子元素跟随父级一起浮(不单独分级)
+		for (const el of candidates) {
+			if (!el || !main.contains(el)) continue;
+			el.style.setProperty('--enter-stage', String(stage++));
+			el.setAttribute('data-enter-stage', '');
+		}
+	}
+	markEnterStages();
+	document.addEventListener('astro:page-load', markEnterStages);
+</script>
+
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 

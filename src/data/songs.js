@@ -168,5 +168,15 @@ export default [
 		// 封面:Spotify《Big Big World》官方专辑封面
 		cover: '/blog/covers/bigbigworld.jpg',
 		added: '2026-11-23'
+	},
+	{
+		title: '送你一朵小红花',
+		artist: '赵英俊',
+		type: 'youtube',
+		src: '5dA6S_1aRr8',
+		duration: '3:52',
+		// 封面:Spotify《送你一朵小红花 - Single》官方封面
+		cover: '/blog/covers/xiaohonghua.jpg',
+		added: '2026-11-25'
 	}
 ];

@@ -125,6 +125,8 @@ import songs from '../data/songs.js';
 			}
 		}
 		ytPlayer = new window.YT.Player('yt-host', {
+			height: '1',
+			width: '1',
 			playerVars: { playsinline: 1 }
 		});
 	}
@@ -452,15 +454,6 @@ import songs from '../data/songs.js';
 		color: rgb(var(--gray-dark));
 		font-variant-numeric: tabular-nums;
 	}
-	/* YouTube 挂载点:移出视口,只出声不见画(display:none 会导致某些浏览器不出声) */
-	.yt-host {
-		position: absolute;
-		left: -9999px;
-		top: 0;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-	}
 	/* 全局底部播放栏 */
 	.player-bar {
 		position: fixed;
@@ -541,5 +534,20 @@ import songs from '../data/songs.js';
 			width: 36px;
 			height: 36px;
 		}
+	}
+</style>
+
+<style is:global>
+	/* YouTube 挂载点:移出视口,只出声不见画(display:none 会导致某些浏览器不出声)。
+	   样式必须挂在 id 上:YT API 创建播放器时会把 #yt-host 这个 div 整个
+	   替换成 iframe,class 会丢而 id 保留;scoped 样式靠 data-astro-cid 属性
+	   匹配,iframe 上没有这个属性,scoped 规则也落空 → 必须 is:global */
+	#yt-host {
+		position: absolute;
+		left: -9999px;
+		top: 0;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
 	}
 </style>
