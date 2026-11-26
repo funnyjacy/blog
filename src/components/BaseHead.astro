@@ -68,7 +68,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 		const path = norm(location.pathname);
 		const isPost =
 			/^\/blog\/.+/.test(location.pathname) &&
-			!['/blog/about/', '/blog/music/', '/blog/search/'].some((p) =>
+			!['/blog/about/', '/blog/music/', '/blog/message-board/', '/blog/search/'].some((p) =>
 				location.pathname.startsWith(p),
 			);
 		// 文章页归"首页"名下;首页 href 带 base 前缀,归一化后是 '/blog'

@@ -1,0 +1,37 @@
+---
+// 留言板:标题和引导语直接写死在模板里,评论区复用 Comment 组件(giscus)
+import BaseHead from '../components/BaseHead.astro';
+import Comment from '../components/Comment.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN" class="message-board">
+	<head>
+		<BaseHead title={`留言板 - ${SITE_TITLE}`} description="来即缘分，留下你想说的话" />
+	</head>
+	<body>
+		<Header />
+		<main class="prose">
+			<h1>留言板</h1>
+			<p class="lead">博客只是路过，留句话便是缘分。无论想说什么、期待什么，都欢迎写在这里。</p>
+			<Comment />
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	main.prose {
+		padding-top: 2em;
+	}
+	h1 {
+		margin-bottom: 0.4em;
+	}
+	.lead {
+		color: rgb(var(--gray));
+		margin-bottom: 2em;
+	}
+</style>

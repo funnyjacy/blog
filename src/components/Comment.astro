@@ -27,13 +27,48 @@ const enabled = Boolean(GISCUS.repo && GISCUS.repoId && GISCUS.categoryId);
 				async
 			/>
 			<script is:inline>
+				// giscus 的 preferred_color_scheme 跟随的是操作系统偏好,不跟随站点的
+				// html.dark(用户点站点主题按钮切换时它不变,浅色站点里会留一个黑框)。
+				// 这里在脚本执行前把 data-theme 落成当前站点主题,并监听 html class
+				// 变化;iframe 已存在时用 postMessage 通知 giscus 换主题。
+				function siteTheme() {
+					return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+				}
+				function applyGiscusTheme() {
+					const section = document.querySelector('.comments');
+					if (!section) return;
+					const script = section.querySelector('script[src*="giscus.app/client.js"]');
+					if (script) script.setAttribute('data-theme', siteTheme());
+					const iframe = section.querySelector('iframe');
+					if (iframe?.contentWindow) {
+						iframe.contentWindow.postMessage(
+							{ giscus: { setConfig: { theme: siteTheme() } } },
+							'https://giscus.app',
+						);
+					}
+				}
+				// giscus iframe 内部的 message 监听要等它就绪才注册,提前发的
+				// postMessage 会丢。它就绪后会主动向父页发 giscus 消息,收到即推主题
+				window.addEventListener('message', (e) => {
+					if (e.origin !== 'https://giscus.app' || !e.data?.giscus) return;
+					if (e.data.giscus.discussion || e.data.giscus.error) applyGiscusTheme();
+				});
+				// 单独监 html.class,盖住主题按钮切换的情况(那不会触发 page-load)
+				new MutationObserver(applyGiscusTheme).observe(document.documentElement, {
+					attributes: true,
+					attributeFilter: ['class'],
+				});
+
 				// SPA 导航(ClientRouter)后脚本不重跑,giscus 的 iframe 不会被重建。
 				// astro:page-load 在首次加载和每次 SPA 换页后都触发;已有 iframe 则跳过。
 				// client.js 重新执行才会建 iframe,而浏览器对同 URL 的经典脚本插入也不会
 				// 二次执行,所以克隆一份带 data-* 的脚本节点插回去,强制重新加载执行。
 				function initComments() {
 					const section = document.querySelector('.comments');
-					if (!section || section.querySelector('iframe')) return;
+					if (!section) return;
+					// 已有 iframe(首屏 client.js 抢跑/换页回来)也要把主题推过去
+					applyGiscusTheme();
+					if (section.querySelector('iframe')) return;
 					const src = section.querySelector('script[src*="giscus.app/client.js"]');
 					if (!src) return;
 					const clone = document.createElement('script');
@@ -41,6 +76,10 @@ const enabled = Boolean(GISCUS.repo && GISCUS.repoId && GISCUS.categoryId);
 					section.appendChild(clone);
 				}
 				document.addEventListener('astro:page-load', initComments);
+				// 首屏:脚本可能晚于 client.js 执行,page-load 也可能早于 iframe 建好;
+				// 等文件全部加载完再补一次,确保主题一定推到位
+				if (document.readyState === 'complete') initComments();
+				else window.addEventListener('load', initComments);
 			</script>
 		</section>
 	)
