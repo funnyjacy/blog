@@ -221,15 +221,14 @@ html {
 }
 
 /* ===== 换页内容浮现(参考 antfu.me 的 slide-enter) =====
-   astro:page-load 时由 BaseHead 的脚本给 main 的关键子元素按序标
-   --enter-stage(0,1,2,...),下面的规则把它们动画进场:从下方 10px
-   淡入上浮,每级延迟 90ms,形成标题先到、内容逐级跟上的层次感。
+   astro:page-load 时由 BaseHead 的脚本给 main 的关键子元素打
+   data-enter-stage 标记,下面的规则让它们整体一起动画进场:
+   从下方 10px 淡入上浮,不做逐级延迟(整页同时浮出,快)。
    动画只在元素刚标上时播一次;整页刷新或 SPA 换页后重新标记即重放。
    尊重系统减少动效设置 */
 @media (prefers-reduced-motion: no-preference) {
 	[data-enter-stage] {
-		animation: slide-enter 0.7s ease both;
-		animation-delay: calc(var(--enter-stage, 0) * 90ms);
+		animation: slide-enter 0.45s ease both;
 	}
 }
 @keyframes slide-enter {
