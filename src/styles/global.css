@@ -120,8 +120,29 @@ textarea {
 input {
 	font-size: 16px;
 }
+/* markdown 表格:合并边框画网格线,单元格留内边距;
+   窄屏(手机)下表格自身横向滚动,不撑破页面 */
 table {
 	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 1.2em;
+	font-size: 0.85em;
+	display: block;
+	overflow-x: auto;
+}
+th,
+td {
+	border: 1px solid rgba(var(--gray), 45%);
+	padding: 0.4em 0.7em;
+	text-align: left;
+	vertical-align: top;
+}
+th {
+	background: rgba(var(--gray-light), 60%);
+	font-weight: 600;
+}
+html.dark th {
+	background: rgba(var(--gray-light), 50%);
 }
 img {
 	max-width: 100%;
