@@ -7,7 +7,6 @@ import FallbackImage from '../assets/blog-placeholder-1.jpg';
 import { SITE_TITLE, UMAMI } from '../consts';
 import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
-import NavProgress from './NavProgress.astro';
 
 interface Props {
 	title: string;
@@ -22,9 +21,6 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 <!-- SPA 模式:点击链接不整页跳转,后台换内容,不转圈不闪 -->
 <ClientRouter />
-
-<!-- 顶部换页进度条:换页稍慢时给个明确的"正在加载"反馈 -->
-<NavProgress />
 
 <!-- Global Metadata -->
 <meta charset="utf-8" />

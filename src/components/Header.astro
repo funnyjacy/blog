@@ -1,12 +1,17 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import NavProgress from './NavProgress.astro';
 
 // 所有链接必须拼上 base('/blog'),否则会跳到 io/xxx 404
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <header>
+	<!-- 顶部换页进度条。必须放在 body 里(Header 在 body 内),不能进 BaseHead:
+	     NavProgress 渲染一个 div,div 出现在 <head> 会让浏览器提前结束 head,
+	     后面所有 meta/link(favicon、title 等)全部掉进 body,favicon 失效 -->
+	<NavProgress />
 	<nav>
 		<h2>
 			<a class="site-brand" href={base}>
