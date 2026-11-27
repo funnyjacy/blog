@@ -131,6 +131,23 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 		align-items: center;
 		justify-content: space-between;
 	}
+	/* 三列网格:左侧站名 / 中间链接 / 右侧主题按钮。
+
+	   只在足够宽(≥820px)时启用;更窄的宽度三列放不下,网格会把站名挤成
+	   省略号,那个区间退回上面的 flex space-between(不居中但不重叠) */
+	@media (min-width: 820px) {
+		nav {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+		}
+		nav > h2 {
+			justify-self: start;
+			min-width: 0;
+		}
+		nav > .theme-toggle {
+			justify-self: end;
+		}
+	}
 	nav a {
 		padding: 1em 0.5em;
 		color: var(--black);
