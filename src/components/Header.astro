@@ -67,6 +67,10 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 			applyTheme(dark);
 			return;
 		}
+		// 注:试过"先推 giscus 主题、延后 180ms 再启动 VT"来让跨域 iframe 参与渐变,
+		// 结果是评论框抢在整页之前变色,更难受,已回退。
+		// giscus 是跨域 iframe,VT 快照抓不到它的实时画面,它的换色永远落在 VT 之后,
+		// 所以它那一块是"渐变结束后突变"——这是 iframe + VT 的固有限制,接受现状。
 		document.startViewTransition(() => applyTheme(dark));
 	}
 

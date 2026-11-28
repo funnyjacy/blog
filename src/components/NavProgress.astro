@@ -1,100 +1,111 @@
 ---
-// 顶部换页进度条(类似 antfu.me / GitHub 顶部那条):
-// 点站内链接的瞬间在视口最顶端亮出一条,先窜到 15% 再慢慢爬,
-// SPA 换页完成后冲到 100% 再淡出。
-// 纯原生,无依赖;仅拦截 ClientRouter 的 SPA 换页,不影响跨站链接。
+// 顶部换页进度条(类似 GitHub/YouTube 顶部那条):
+// 点站内链接立即出现,先走到 15% 再缓慢逼近 90%,
+// SPA 换页完成(astro:page-load)时冲到 100%,停顿一下再淡出。
+// 纯原生,无依赖;仅拦站内同源链接,不影响外链/新标签页。
 ---
-
 <div id="nav-progress" aria-hidden="true">
 	<div class="nav-progress-bar"></div>
 </div>
 
 <script is:inline>
 	(function () {
-		// 本脚本在 <head> 里执行时 body 还没解析,#nav-progress 还不存在,
-		// 必须等 DOM 就绪再取元素(不能像普通组件那样直接 document.getElementById)
-		function init() {
-			const root = document.getElementById('nav-progress');
-			if (!root || root.dataset.ready) return;
-			root.dataset.ready = '1';
-			const bar = root.querySelector('.nav-progress-bar');
-		const SHOW_DELAY = 250;
-		let shown = false;
-		let showTimer = null;
+		if (window.__navProgressBound) return;
+		window.__navProgressBound = true;
+
+		// 关键:SPA 换页会整段替换 body,#nav-progress 是全新节点。
+		// 所以任何操作都要现查 DOM,绝不缓存元素引用(缓存会导致
+		// 换页后往已销毁的旧节点上写样式,页面上那条永远停在旧进度)。
+		// 监听绑在 document/window 上,只绑一次,不随换页重复累积。
+		const $root = () => document.getElementById('nav-progress');
+		const $bar = () => {
+			const r = $root();
+			return r && r.querySelector('.nav-progress-bar');
+		};
+
+		const CREEP_MS = 200;
+		const FINISH_MS = 320;
 		let creepTimer = null;
 		let finishTimer = null;
-		let value = 0;
+		let running = false;
 
 		function setValue(v) {
-			value = v;
-			bar.style.transform = 'scaleX(' + v + ')';
+			const b = $bar();
+			if (b) b.style.transform = 'scaleX(' + v + ')';
 		}
-		function start() {
+		function clearTimers() {
+			clearTimeout(creepTimer);
 			clearTimeout(finishTimer);
-			clearTimeout(creepTimer);
-			clearTimeout(showTimer);
-			root.classList.remove('nav-progress-done');
-			shown = false;
-			// 先静默走到 15%,250ms 后才亮出来:预取让换页常常很快,
-			// 太快时条一闪而过反而晃眼,只有真慢了才显示
-			setValue(0.15);
-			showTimer = setTimeout(function () {
-				shown = true;
-				root.classList.add('nav-progress-active');
-				creep();
-			}, SHOW_DELAY);
-		}
-		function creep() {
-			if (!shown) return;
-			// 慢慢逼近 90%,永远到不了 100(等换页真完成)
-			value += (0.9 - value) * 0.08;
-			setValue(value);
-			creepTimer = setTimeout(creep, 220);
-		}
-		function finish() {
-			clearTimeout(creepTimer);
-			clearTimeout(showTimer);
-			if (!shown) return; // 没亮过就直接结束,不闪一下
-			shown = false;
-			setValue(1);
-			root.classList.add('nav-progress-done');
-			finishTimer = setTimeout(function () {
-				root.classList.remove('nav-progress-active', 'nav-progress-done');
-				setValue(0);
-			}, 300);
+			creepTimer = finishTimer = null;
 		}
 
-		// 点到站内链接就起条(ClientRouter 会拦下同源链接,这里只判断同源)
+		function start() {
+			const r = $root();
+			if (!r) return;
+			clearTimers();
+			r.classList.remove('nav-progress-done');
+			r.classList.add('nav-progress-active');
+			running = true;
+			let value = 0.15;
+			setValue(value);
+
+			// 平滑逼近 90%,剩下的留给 finish 冲线
+			const creep = () => {
+				if (!running) return;
+				value += (0.9 - value) * 0.12;
+				setValue(value);
+				creepTimer = setTimeout(creep, CREEP_MS);
+			};
+			creep();
+		}
+
+		function finish() {
+			if (!running) return;
+			running = false;
+			clearTimers();
+			const r = $root();
+			if (!r) return;
+			// 冲到最右端,表示加载完成
+			setValue(1);
+			r.classList.add('nav-progress-done');
+			finishTimer = setTimeout(() => {
+				const cur = $root();
+				if (cur) cur.classList.remove('nav-progress-active', 'nav-progress-done');
+				// 重置到 0 时先关掉过渡,避免条"倒着缩回去"被看见
+				const b = $bar();
+				if (b) {
+					b.style.transition = 'none';
+					b.style.transform = 'scaleX(0)';
+					// 强制回流后再恢复过渡,否则下一轮起条没有动画
+					void b.offsetWidth;
+					b.style.transition = '';
+				}
+			}, FINISH_MS);
+		}
+
 		document.addEventListener(
 			'click',
-			function (e) {
-				if (e.defaultPrevented || e.button !== 0) return;
-				if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+			(e) => {
+				if (e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
 				let link = e.target;
 				if (link instanceof Element) link = link.closest('a');
 				if (!(link instanceof HTMLAnchorElement)) return;
 				if (link.target && link.target !== '_self') return;
-				if (link.hasAttribute('download')) return;
+				if (link.hasAttribute('download') || link.dataset.astroReload !== undefined) return;
 				const url = new URL(link.href, location.href);
 				if (url.origin !== location.origin) return;
+				// 同一个页面(点当前页的导航):ClientRouter 也会 swap,但很快,
+				// 起条再收条会闪一下,直接不起
+				if (url.pathname === location.pathname && url.search === location.search) return;
 				start();
 			},
 			true,
 		);
 
-		// 换页完成:先冲满再淡出
+		// 换页完成(首屏加载也会触发,此时没起过条,finish 会被 running 挡掉)
 		document.addEventListener('astro:page-load', finish);
-		// 用户点了浏览器后退/前进等也收尾
-		window.addEventListener('popstate', start);
-		}
-
-		// <head> 里执行时 body 未解析;SPA 换页后组件节点会重建,也要重新 init
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', init);
-		} else {
-			init();
-		}
-		document.addEventListener('astro:page-load', init);
+		// 用户中途取消/后退:也收尾,避免条卡住
+		window.addEventListener('popstate', () => finish());
 	})();
 </script>
 
@@ -120,8 +131,9 @@
 		background: var(--accent);
 		transform: scaleX(0);
 		transform-origin: 0 50%;
+		/* 冲线要快、爬升要稳:统一用短过渡,JS 那边控制节奏 */
 		transition:
-			transform 0.22s ease-out,
+			transform 0.18s linear,
 			opacity 0.3s ease;
 	}
 	#nav-progress.nav-progress-done .nav-progress-bar {
