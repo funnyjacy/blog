@@ -1,7 +1,7 @@
 ---
-// 顶部换页进度条(类似 GitHub/YouTube 顶部那条):
-// 点站内链接立即出现,先走到 15% 再缓慢逼近 90%,
-// SPA 换页完成(astro:page-load)时冲到 100%,停顿一下再淡出。
+// 顶部换页进度条(类似 GitHub/YouTube 顶部那条)。
+// 依次经历:点击 → 亮条并爬到 15% → 缓慢逼近 90% →
+// 加载完成 → 快速冲到 100% → 停留 → 淡出。
 // 纯原生,无依赖;仅拦站内同源链接,不影响外链/新标签页。
 ---
 <div id="nav-progress" aria-hidden="true">
@@ -13,83 +13,101 @@
 		if (window.__navProgressBound) return;
 		window.__navProgressBound = true;
 
-		// 关键:SPA 换页会整段替换 body,#nav-progress 是全新节点。
-		// 所以任何操作都要现查 DOM,绝不缓存元素引用(缓存会导致
-		// 换页后往已销毁的旧节点上写样式,页面上那条永远停在旧进度)。
-		// 监听绑在 document/window 上,只绑一次,不随换页重复累积。
+		// 关键:SPA 换页会整段替换 body,#nav-progress 是全新节点,
+		// 新节点没有 active 类、transform 是 0。所以:
+		//  1. 任何操作都现查 DOM,绝不缓存元素引用;
+		//  2. 换页时在 astro:after-swap 把新条按当前进度立刻点亮,
+		//     否则它会以"隐形"状态存在,finish() 冲到 100% 也看不见,
+		//     表现就是"条走到一半、页面一变就没了"。
 		const $root = () => document.getElementById('nav-progress');
 		const $bar = () => {
 			const r = $root();
 			return r && r.querySelector('.nav-progress-bar');
 		};
 
-		const CREEP_MS = 200;
-		// 冲满后停留多久再淡出:太短(320ms)时人眼只来得及看到爬升的中段,
-		// 会以为"没冲到最右边";600ms 能明确看到它铺满整条
-		const HOLD_MS = 600;
-		// 淡出时长,和 CSS 里 .nav-progress-done 的 opacity 过渡保持一致
-		const FADE_MS = 260;
-		let creepTimer = null;
-		let finishTimer = null;
-		let running = false;
+		const CREEP_MS = 200; // 缓慢爬升的步进间隔
+		const RUSH_MS = 200; // 冲到 100% 的过渡时长(略大于 CSS 的 0.18s)
+		const HOLD_MS = 400; // 满条停留,让人看清已经到头
+		const FADE_MS = 280; // 淡出时长,与 CSS .nav-progress-done 一致
 
-		function setValue(v) {
+		let value = 0;
+		let running = false;
+		let creepTimer = null;
+
+		function write(v) {
 			const b = $bar();
 			if (b) b.style.transform = 'scaleX(' + v + ')';
 		}
-		function clearTimers() {
+		function clearCreep() {
 			clearTimeout(creepTimer);
-			clearTimeout(finishTimer);
-			creepTimer = finishTimer = null;
+			creepTimer = null;
 		}
 
 		function start() {
 			const r = $root();
 			if (!r) return;
-			clearTimers();
+			clearCreep();
 			r.classList.remove('nav-progress-done');
 			r.classList.add('nav-progress-active');
 			running = true;
-			let value = 0.15;
-			setValue(value);
-
-			// 平滑逼近 90%,剩下的留给 finish 冲线
+			value = 0.15;
+			write(value);
 			const creep = () => {
 				if (!running) return;
+				// 逼近 90%,剩下的留给完成时的冲线
 				value += (0.9 - value) * 0.12;
-				setValue(value);
+				write(value);
 				creepTimer = setTimeout(creep, CREEP_MS);
 			};
-			creep();
+			creepTimer = setTimeout(creep, CREEP_MS);
+		}
+
+		// 换页把 DOM 换掉后,新条默认隐形。按当前进度立刻点亮,
+		// 让用户在视觉上感到"同一条"继续存在,而不是凭空消失。
+		function revealCurrent() {
+			if (!running) return;
+			const r = $root();
+			const b = $bar();
+			if (!r || !b) return;
+			r.classList.remove('nav-progress-done');
+			r.classList.add('nav-progress-active');
+			b.style.transition = 'none';
+			b.style.transform = 'scaleX(' + value + ')';
+			void b.offsetWidth; // 强制回流,让上面的瞬时值生效
+			b.style.transition = ''; // 恢复 CSS 过渡,供后续冲线使用
 		}
 
 		function finish() {
 			if (!running) return;
 			running = false;
-			clearTimers();
+			clearCreep();
 			const r = $root();
-			if (!r) return;
-			// 冲到最右端,明示加载完成;先等过渡把它推到头再开始计时淡出,
-			// 否则条还没走到右侧就被摘掉,看起来像"没走完就消失"
-			setValue(1);
-			finishTimer = setTimeout(() => {
+			const b = $bar();
+			if (!r || !b) return;
+			// 新页面的条可能还没点亮(after-swap 没跑到就到这了),先补上
+			r.classList.remove('nav-progress-done');
+			r.classList.add('nav-progress-active');
+			// 冲线:不管当前停在哪,都用过渡快速推到最右端
+			b.style.transform = 'scaleX(1)';
+			// 等冲线动画走完 + 停留,再淡出;否则条没到头就开始消失
+			setTimeout(() => {
 				const cur = $root();
 				if (!cur) return;
 				cur.classList.add('nav-progress-done');
 				setTimeout(() => {
 					const fin = $root();
+					const finBar = $bar();
 					if (fin) fin.classList.remove('nav-progress-active', 'nav-progress-done');
-					// 重置到 0 时先关掉过渡,避免条"倒着缩回去"被看见
-					const b = $bar();
-					if (b) {
-						b.style.transition = 'none';
-						b.style.transform = 'scaleX(0)';
-						// 强制回流后再恢复过渡,否则下一轮起条没有动画
-						void b.offsetWidth;
-						b.style.transition = '';
+					if (finBar) {
+						// 归零时关掉过渡,避免出现"倒着缩回去"的动画
+						finBar.style.transition = 'none';
+						finBar.style.transform = 'scaleX(0)';
+						void finBar.offsetWidth;
+						finBar.style.transition = '';
 					}
+					value = 0;
 				}, FADE_MS);
-			}, HOLD_MS);
+			}, RUSH_MS + HOLD_MS);
 		}
 
 		document.addEventListener(
@@ -103,18 +121,19 @@
 				if (link.hasAttribute('download') || link.dataset.astroReload !== undefined) return;
 				const url = new URL(link.href, location.href);
 				if (url.origin !== location.origin) return;
-				// 同一个页面(点当前页的导航):ClientRouter 也会 swap,但很快,
-				// 起条再收条会闪一下,直接不起
+				// 点当前页自己的导航不算跳转,起条只会闪一下
 				if (url.pathname === location.pathname && url.search === location.search) return;
 				start();
 			},
 			true,
 		);
 
-		// 换页完成(首屏加载也会触发,此时没起过条,finish 会被 running 挡掉)
+		// 新文档已就位、旧文档已移除:把条接续点亮
+		document.addEventListener('astro:after-swap', revealCurrent);
+		// 换页完成:冲线 → 停留 → 淡出(首屏加载也会触发,靠 running 挡掉)
 		document.addEventListener('astro:page-load', finish);
-		// 用户中途取消/后退:也收尾,避免条卡住
-		window.addEventListener('popstate', () => finish());
+		// 浏览器前进/后退同样走 SPA 换页流程,起条后由上面两个事件收尾
+		window.addEventListener('popstate', () => start());
 	})();
 </script>
 
@@ -141,14 +160,13 @@
 		background: var(--accent);
 		transform: scaleX(0);
 		transform-origin: 0 50%;
-		/* 冲线要快、爬升要稳:统一用短过渡,JS 那边控制节奏 */
 		transition:
 			transform 0.18s linear,
 			opacity 0.3s ease;
 	}
 	#nav-progress.nav-progress-done .nav-progress-bar {
-		/* 淡出时长与 JS 里的 FADE_MS 一致(260ms) */
-		transition: opacity 0.26s ease;
+		/* 淡出时长与 JS 里的 FADE_MS 一致(280ms) */
+		transition: opacity 0.28s ease;
 		opacity: 0;
 	}
 	@media (prefers-reduced-motion: reduce) {
