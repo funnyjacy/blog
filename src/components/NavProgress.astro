@@ -29,43 +29,58 @@
 		const RUSH_MS = 200; // 冲到 100% 的过渡时长(略大于 CSS 的 0.18s)
 		const HOLD_MS = 400; // 满条停留,让人看清已经到头
 		const FADE_MS = 280; // 淡出时长,与 CSS .nav-progress-done 一致
+		// 起条后先静默这么久再显示:站点开了预取,大部分换页 200ms 内就完成,
+		// 这种时候条一闪而过比不显示更烦人,只有真的慢了才亮出来
+		const SHOW_DELAY = 250;
 
 		let value = 0;
 		let running = false;
+		let shown = false; // 条是否已经亮出来过(没过 SHOW_DELAY 时为 false)
 		let creepTimer = null;
+		let showTimer = null;
 
 		function write(v) {
 			const b = $bar();
 			if (b) b.style.transform = 'scaleX(' + v + ')';
 		}
-		function clearCreep() {
+		function clearTimers() {
 			clearTimeout(creepTimer);
+			clearTimeout(showTimer);
 			creepTimer = null;
+			showTimer = null;
 		}
 
 		function start() {
 			const r = $root();
 			if (!r) return;
-			clearCreep();
-			r.classList.remove('nav-progress-done');
-			r.classList.add('nav-progress-active');
+			clearTimers();
+			r.classList.remove('nav-progress-done', 'nav-progress-active');
 			running = true;
+			shown = false;
 			value = 0.15;
 			write(value);
-			const creep = () => {
+			// 延迟之后才点亮并开始爬;真快速换页时 finish 会先到,条从头到尾不出现
+			showTimer = setTimeout(() => {
+				showTimer = null;
 				if (!running) return;
-				// 逼近 90%,剩下的留给完成时的冲线
-				value += (0.9 - value) * 0.12;
-				write(value);
+				const cur = $root();
+				if (cur) cur.classList.add('nav-progress-active');
+				shown = true;
+				const creep = () => {
+					if (!running) return;
+					// 逼近 90%,剩下的留给完成时的冲线
+					value += (0.9 - value) * 0.12;
+					write(value);
+					creepTimer = setTimeout(creep, CREEP_MS);
+				};
 				creepTimer = setTimeout(creep, CREEP_MS);
-			};
-			creepTimer = setTimeout(creep, CREEP_MS);
+			}, SHOW_DELAY);
 		}
 
-		// 换页把 DOM 换掉后,新条默认隐形。按当前进度立刻点亮,
-		// 让用户在视觉上感到"同一条"继续存在,而不是凭空消失。
+		// 换页把 DOM 换掉后,新条默认隐形。只有条已经亮出来过才接续点亮,
+		// 否则(还没过 SHOW_DELAY)会在新页面上凭空闪一下。
 		function revealCurrent() {
-			if (!running) return;
+			if (!running || !shown) return;
 			const r = $root();
 			const b = $bar();
 			if (!r || !b) return;
@@ -80,7 +95,15 @@
 		function finish() {
 			if (!running) return;
 			running = false;
-			clearCreep();
+			clearTimers();
+			// 没过 SHOW_DELAY 就加载完了:当作从未出现,什么都不做。
+			// 此时条本来也是隐藏的,不需要清理,下次 start 会覆盖状态。
+			if (!shown) {
+				shown = false;
+				value = 0;
+				return;
+			}
+			shown = false;
 			const r = $root();
 			const b = $bar();
 			if (!r || !b) return;
@@ -143,8 +166,8 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		/* 3px 在深色主题下几乎看不见,4px 兼顾不抢眼和可辨识 */
-		height: 4px;
+		/* 3px 更细,不抢眼;深色下也够辨识 */
+		height: 3px;
 		z-index: 100;
 		pointer-events: none;
 		opacity: 0;
