@@ -24,7 +24,11 @@
 		};
 
 		const CREEP_MS = 200;
-		const FINISH_MS = 320;
+		// 冲满后停留多久再淡出:太短(320ms)时人眼只来得及看到爬升的中段,
+		// 会以为"没冲到最右边";600ms 能明确看到它铺满整条
+		const HOLD_MS = 600;
+		// 淡出时长,和 CSS 里 .nav-progress-done 的 opacity 过渡保持一致
+		const FADE_MS = 260;
 		let creepTimer = null;
 		let finishTimer = null;
 		let running = false;
@@ -65,22 +69,27 @@
 			clearTimers();
 			const r = $root();
 			if (!r) return;
-			// 冲到最右端,表示加载完成
+			// 冲到最右端,明示加载完成;先等过渡把它推到头再开始计时淡出,
+			// 否则条还没走到右侧就被摘掉,看起来像"没走完就消失"
 			setValue(1);
-			r.classList.add('nav-progress-done');
 			finishTimer = setTimeout(() => {
 				const cur = $root();
-				if (cur) cur.classList.remove('nav-progress-active', 'nav-progress-done');
-				// 重置到 0 时先关掉过渡,避免条"倒着缩回去"被看见
-				const b = $bar();
-				if (b) {
-					b.style.transition = 'none';
-					b.style.transform = 'scaleX(0)';
-					// 强制回流后再恢复过渡,否则下一轮起条没有动画
-					void b.offsetWidth;
-					b.style.transition = '';
-				}
-			}, FINISH_MS);
+				if (!cur) return;
+				cur.classList.add('nav-progress-done');
+				setTimeout(() => {
+					const fin = $root();
+					if (fin) fin.classList.remove('nav-progress-active', 'nav-progress-done');
+					// 重置到 0 时先关掉过渡,避免条"倒着缩回去"被看见
+					const b = $bar();
+					if (b) {
+						b.style.transition = 'none';
+						b.style.transform = 'scaleX(0)';
+						// 强制回流后再恢复过渡,否则下一轮起条没有动画
+						void b.offsetWidth;
+						b.style.transition = '';
+					}
+				}, FADE_MS);
+			}, HOLD_MS);
 		}
 
 		document.addEventListener(
@@ -115,7 +124,8 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 3px;
+		/* 3px 在深色主题下几乎看不见,4px 兼顾不抢眼和可辨识 */
+		height: 4px;
 		z-index: 100;
 		pointer-events: none;
 		opacity: 0;
@@ -137,6 +147,8 @@
 			opacity 0.3s ease;
 	}
 	#nav-progress.nav-progress-done .nav-progress-bar {
+		/* 淡出时长与 JS 里的 FADE_MS 一致(260ms) */
+		transition: opacity 0.26s ease;
 		opacity: 0;
 	}
 	@media (prefers-reduced-motion: reduce) {
