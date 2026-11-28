@@ -178,5 +178,25 @@ export default [
 		// 封面:Spotify《送你一朵小红花 - Single》官方封面
 		cover: '/blog/covers/xiaohonghua.jpg',
 		added: '2026-11-25'
+	},
+	{
+		title: '忙碌的生活「人山人海」',
+		artist: '时空储蓄罐',
+		type: 'youtube',
+		src: 'JeDUkQlBR14',
+		duration: '2:04',
+		// 封面:网易云《忙しい生活「人山人海」》官方专辑封面
+		cover: '/blog/covers/busy-live-crowd.jpg',
+		added: '2026-11-27'
+	},
+	{
+		title: '家族の時間（『天気の子』より） (Piano Ver.)',
+		artist: 'Piano Echoes',
+		type: 'youtube',
+		src: 'D_N11vt5gZE',
+		duration: '2:29',
+		// 封面:网易云《天気の子 新海誠作品〜ピアノで聴くアニメ映画音楽》官方专辑封面
+		cover: '/blog/covers/kazoku-no-jikan-piano.jpg',
+		added: '2026-11-27'
 	}
 ];

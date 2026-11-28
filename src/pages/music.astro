@@ -428,8 +428,13 @@ import songs from '../data/songs.js';
 	}
 	.song-title {
 		font-weight: 600;
-		/* 长标题(如"六等星の夜 Magic Blue ver.")不截断会把整行撑出屏幕,
-		   造成手机页面左右拖动;flex 内必须 min-width:0 才能收缩触发省略号 */
+		/* 需求:歌名优先完整显示,空间不够时先省略歌手名。
+		   做法:标题可收缩(shrink 1)但收缩量按比例分担,单靠 shrink 值
+		   调不出"歌手先没"的效果(实测 0.02 与 100 的比例下标题根本不缩,
+		   360px 下直接撑破 173px),改用 max-width 给标题硬上限:
+		   标题最多占 60% 行宽,超长的部分截断,剩余空间留给歌手 */
+		flex: 0 1 auto;
+		max-width: 60%;
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -440,11 +445,17 @@ import songs from '../data/songs.js';
 		font-size: 0.85em;
 		font-variant-numeric: tabular-nums;
 		margin-left: 1em;
+		/* 日期是整行里信息价值最低的一列:不压缩、不折行,空间紧时由下方
+		   媒体查询直接隐藏,把宽度让给歌名和歌手 */
+		flex-shrink: 0;
+		white-space: nowrap;
 	}
 	.song-artist {
 		color: rgb(var(--gray-dark));
-		flex: 1;
-		/* 歌手名也截断:标题截断后歌手名兜住剩余空间,保证整行不超宽 */
+		/* 歌手名承接被压缩的空间:歌名完整时占据剩余宽度,
+		   歌名太长时先被压成省略号(信息优先级低于歌名) */
+		flex: 1 1 auto;
+		/* 歌手名也截断:标题占满后由它兜底省略,保证整行不超宽 */
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -453,6 +464,8 @@ import songs from '../data/songs.js';
 	.song-duration {
 		color: rgb(var(--gray-dark));
 		font-variant-numeric: tabular-nums;
+		flex-shrink: 0;
+		white-space: nowrap;
 	}
 	/* 全局底部播放栏 */
 	.player-bar {
